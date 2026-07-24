@@ -1,9 +1,12 @@
-# VS Code
-.vscode/
-
 # Java compiled files
 bin/
 *.class
 
+# VS Code
+.vscode/
+
 # macOS
 .DS_Store
+
+# Logs
+*.log
