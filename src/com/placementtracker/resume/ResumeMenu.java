@@ -10,10 +10,11 @@ import java.util.Scanner;
 public class ResumeMenu {
 
     private final Scanner scanner;
-    private final ResumeTracker tracker = new ResumeTracker();
+    private final ResumeTracker tracker;
 
-    public ResumeMenu(Scanner scanner) {
+    public ResumeMenu(Scanner scanner, ResumeTracker tracker) {
         this.scanner = scanner;
+        this.tracker = tracker;
     }
 
     public void show() {
