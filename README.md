@@ -2,29 +2,6 @@
 
 A Java-based console application that helps students organize and monitor their placement preparation. The application provides a menu-driven interface to track DSA progress, projects, study activities, and placement goals.
 
-## Features
-
-### ✅ Implemented
-- DSA Progress Tracker
-- Project Tracker
-- Menu-driven Console Interface
-- CRUD Operations
-- Input Validation
-- Exception Handling
-
-### 🚧 Planned
-- Study Tracker
-- Placement Application Tracker
-- Achievement Tracker
-- Goal Management
-- Streak Timer (Multithreading)
-- File Handling
-- JDBC Database Integration
-- Reports & Analytics
-- User Authentication
-
----
-
 ## Tech Stack
 
 - Java 21
@@ -62,25 +39,6 @@ PlacementPreparationTracker/
 ├── lib/
 └── README.md
 ```
-
----
-
-## Progress
-
-| Module | Status |
-|---------|--------|
-| Project Setup | ✅ |
-| DSA Tracker | ✅ |
-| Project Tracker | ✅ |
-| Study Tracker | 🚧 |
-| Goal Tracker | 🚧 |
-| Application Tracker | 🚧 |
-| Achievement Tracker | 🚧 |
-| Streak Timer | 🚧 |
-| File Handling | 🚧 |
-| JDBC Integration | 🚧 |
-
----
 
 ## Getting Started
 
@@ -129,7 +87,7 @@ This project demonstrates the implementation of:
 - Authentication System
 - Search & Filtering
 - Reports & Analytics
-- Improved Console UI
+- Improved UI
 
 ---
 
