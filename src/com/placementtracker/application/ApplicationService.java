@@ -2,10 +2,15 @@ package com.placementtracker.application;
 
 import com.placementtracker.common.exception.DuplicateApplicationException;
 import com.placementtracker.common.exception.InvalidApplicationDataException;
+import com.placementtracker.common.exception.InvalidFileDataException;
+import com.placementtracker.common.util.FileUtil;
 import com.placementtracker.resume.Resume;
 import com.placementtracker.resume.ResumeTracker;
 
+import java.io.IOException;
 import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
+import java.util.ArrayList;
 import java.util.List;
 
 public class ApplicationService {
@@ -71,5 +76,75 @@ public class ApplicationService {
             return null;
         }
         return resumeTracker.viewById(application.getResumeId());
+    }
+        public void exportToCSV(String filePath) throws IOException {
+        List<String> lines = new ArrayList<>();
+        lines.add("company,role,dateApplied,status,jobLink,jobDescription,requiredSkills,notes,resumeId");
+        for (JobApplication a : repository.getAll()) {
+            String skills = String.join(";", a.getRequiredSkills());
+            lines.add(String.join(",",
+                    escape(a.getCompany()), escape(a.getRole()), a.getDateApplied().toString(),
+                    a.getStatus().toString(), escape(a.getJobLink()), escape(a.getJobDescription()),
+                    escape(skills), escape(a.getNotes()), a.getResumeId()
+            ));
+        }
+        FileUtil.writeLines(filePath, lines);
+    }
+
+    public List<String> importFromCSV(String filePath) throws IOException {
+        List<String> report = new ArrayList<>();
+        List<String> lines = FileUtil.readLines(filePath);
+
+        for (int i = 1; i < lines.size(); i++) { // skip header row
+            String line = lines.get(i);
+            try {
+                JobApplication application = parseAndAddRow(line);
+                report.add("Row " + (i + 1) + ": Added \"" + application.getRole()
+                        + " @ " + application.getCompany() + "\"");
+            } catch (InvalidFileDataException | InvalidApplicationDataException
+                     | DuplicateApplicationException | IllegalArgumentException e) {
+                report.add("Row " + (i + 1) + ": Skipped — " + e.getMessage());
+            }
+        }
+        return report;
+    }
+
+    private JobApplication parseAndAddRow(String line)
+            throws InvalidFileDataException, InvalidApplicationDataException, DuplicateApplicationException {
+        String[] fields = line.split(",", -1);
+        if (fields.length != 9) {
+            throw new InvalidFileDataException("Expected 9 fields, found " + fields.length + ".");
+        }
+
+        LocalDate dateApplied;
+        ApplicationStatus status;
+        try {
+            dateApplied = LocalDate.parse(fields[2].trim());
+        } catch (DateTimeParseException e) {
+            throw new InvalidFileDataException("Invalid date format: " + fields[2]);
+        }
+        try {
+            status = ApplicationStatus.valueOf(fields[3].trim().toUpperCase());
+        } catch (IllegalArgumentException e) {
+            throw new InvalidFileDataException("Invalid status: " + fields[3]);
+        }
+
+        List<String> skills = new ArrayList<>();
+        if (!fields[6].trim().isEmpty()) {
+            for (String s : fields[6].split(";")) {
+                if (!s.trim().isEmpty()) {
+                    skills.add(s.trim());
+                }
+            }
+        }
+
+        return addApplication(
+                fields[0].trim(), fields[1].trim(), dateApplied, status,
+                fields[4].trim(), fields[5].trim(), skills, fields[7].trim(), fields[8].trim()
+        );
+    }
+
+    private String escape(String value) {
+        return value == null ? "" : value.replace(",", ";");
     }
 }

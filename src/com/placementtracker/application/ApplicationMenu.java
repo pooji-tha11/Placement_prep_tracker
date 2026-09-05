@@ -33,9 +33,11 @@ public class ApplicationMenu {
             System.out.println("3. Update Application Status");
             System.out.println("4. View Resume Used for an Application");
             System.out.println("5. Delete Application");
+            System.out.println("6. Export Applications to File");
+            System.out.println("7. Import Applications from File");
             System.out.println("0. Back to Main Menu");
 
-            int choice = ConsoleUtil.readIntInRange(scanner, "Enter your choice: ", 0, 5);
+            int choice = ConsoleUtil.readIntInRange(scanner, "Enter your choice: ", 0, 7);
 
             switch (choice) {
                 case 1 -> addApplication();
@@ -43,6 +45,8 @@ public class ApplicationMenu {
                 case 3 -> updateStatus();
                 case 4 -> viewResumeForApplication();
                 case 5 -> deleteApplication();
+                case 6 -> exportToFile();
+                case 7 -> importFromFile();
                 case 0 -> back = true;
             }
         }
@@ -158,5 +162,28 @@ public class ApplicationMenu {
         String id = ConsoleUtil.readNonEmptyLine(scanner, "Enter Application ID to delete: ");
         boolean removed = tracker.removeApplication(id);
         System.out.println(removed ? "Application deleted." : "No application found with that ID.");
+    }
+        private void exportToFile() {
+        String path = ConsoleUtil.readNonEmptyLine(scanner, "File path to export to (e.g. applications.csv): ");
+        try {
+            tracker.exportToCSV(path);
+            System.out.println("Applications exported successfully to " + path);
+        } catch (java.io.IOException e) {
+            System.out.println("Export failed: " + e.getMessage());
+        }
+    }
+
+    private void importFromFile() {
+        String path = ConsoleUtil.readNonEmptyLine(scanner, "File path to import from (e.g. applications.csv): ");
+        try {
+            List<String> report = tracker.importFromCSV(path);
+            if (report.isEmpty()) {
+                System.out.println("No rows found to import.");
+            } else {
+                report.forEach(System.out::println);
+            }
+        } catch (java.io.IOException e) {
+            System.out.println("Import failed: " + e.getMessage());
+        }
     }
 }

@@ -5,6 +5,7 @@ import com.placementtracker.project.ProjectMenu;
 import com.placementtracker.resume.ResumeMenu;
 import com.placementtracker.resume.ResumeTracker;
 import com.placementtracker.studystreak.StudyMenu;
+import com.placementtracker.timer.FocusMenu;
 import com.placementtracker.achievement.AchievementMenu;
 import com.placementtracker.application.ApplicationMenu;
 import com.placementtracker.common.util.ConsoleUtil;
@@ -30,9 +31,10 @@ public class MenuRouter {
             System.out.println("5. Study Streak Tracker");
             System.out.println("6. Hackathon & Certification Tracker");
             System.out.println("7. Goal Setting");
+            System.out.println("8. Focus Session Timer");
             System.out.println("0. Exit");
 
-            int choice = ConsoleUtil.readIntInRange(scanner, "Enter your choice: ", 0, 7);
+            int choice = ConsoleUtil.readIntInRange(scanner, "Enter your choice: ", 0, 8);
 
             switch (choice) {
                 case 1 -> routeToDSA();
@@ -42,6 +44,7 @@ public class MenuRouter {
                 case 5 -> routeToStudy();
                 case 6 -> routeToAchievement();
                 case 7 -> routeToGoal();
+                case 8 -> routeToFocus();
                 case 0 -> running = false;
             }
         }
@@ -71,5 +74,8 @@ private void routeToAchievement() {
 }
 private void routeToGoal() {
     new GoalMenu(scanner).show();
+}
+private void routeToFocus() {
+    new FocusMenu(scanner).show();
 }
 }       

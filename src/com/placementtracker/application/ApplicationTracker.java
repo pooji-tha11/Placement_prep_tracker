@@ -4,7 +4,7 @@ import com.placementtracker.common.exception.DuplicateApplicationException;
 import com.placementtracker.common.exception.InvalidApplicationDataException;
 import com.placementtracker.resume.Resume;
 import com.placementtracker.resume.ResumeTracker;
-
+import java.io.IOException;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -42,5 +42,12 @@ public class ApplicationTracker {
 
     public Resume getResumeForApplication(String applicationId) {
         return service.getResumeForApplication(applicationId);
+    }
+        public void exportToCSV(String filePath) throws IOException {
+        service.exportToCSV(filePath);
+    }
+
+    public List<String> importFromCSV(String filePath) throws IOException {
+        return service.importFromCSV(filePath);
     }
 }

@@ -27,14 +27,18 @@ public class ResumeMenu {
             System.out.println("1. Add Resume");
             System.out.println("2. View All Resumes");
             System.out.println("3. Delete Resume");
+            System.out.println("4. Export Resumes to File");
+            System.out.println("5. Import Resumes from File");
             System.out.println("0. Back to Main Menu");
 
-            int choice = ConsoleUtil.readIntInRange(scanner, "Enter your choice: ", 0, 3);
+            int choice = ConsoleUtil.readIntInRange(scanner, "Enter your choice: ", 0, 5);
 
             switch (choice) {
                 case 1 -> addResume();
                 case 2 -> viewAll();
                 case 3 -> deleteResume();
+                case 4 -> exportToFile();
+                case 5 -> importFromFile();
                 case 0 -> back = true;
             }
         }
@@ -69,5 +73,28 @@ public class ResumeMenu {
         String id = ConsoleUtil.readNonEmptyLine(scanner, "Enter Resume ID to delete: ");
         boolean removed = tracker.removeResume(id);
         System.out.println(removed ? "Resume deleted." : "No resume found with that ID.");
+    }
+        private void exportToFile() {
+        String path = ConsoleUtil.readNonEmptyLine(scanner, "File path to export to (e.g. resumes.csv): ");
+        try {
+            tracker.exportToCSV(path);
+            System.out.println("Resumes exported successfully to " + path);
+        } catch (java.io.IOException e) {
+            System.out.println("Export failed: " + e.getMessage());
+        }
+    }
+
+    private void importFromFile() {
+        String path = ConsoleUtil.readNonEmptyLine(scanner, "File path to import from (e.g. resumes.csv): ");
+        try {
+            List<String> report = tracker.importFromCSV(path);
+            if (report.isEmpty()) {
+                System.out.println("No rows found to import.");
+            } else {
+                report.forEach(System.out::println);
+            }
+        } catch (java.io.IOException e) {
+            System.out.println("Import failed: " + e.getMessage());
+        }
     }
 }

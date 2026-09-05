@@ -1,7 +1,7 @@
 package com.placementtracker.resume;
 
 import com.placementtracker.common.exception.DuplicateResumeException;
-
+import java.io.IOException;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -28,5 +28,12 @@ public class ResumeTracker {
 
     public boolean resumeExists(String id) {
         return service.exists(id);
+    }
+        public void exportToCSV(String filePath) throws IOException {
+        service.exportToCSV(filePath);
+    }
+
+    public List<String> importFromCSV(String filePath) throws IOException {
+        return service.importFromCSV(filePath);
     }
 }
