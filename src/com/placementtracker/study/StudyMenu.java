@@ -1,4 +1,4 @@
-package com.placementtracker.studystreak;
+package com.placementtracker.study;
 
 import com.placementtracker.common.util.ConsoleUtil;
 
@@ -9,10 +9,11 @@ import java.util.Scanner;
 public class StudyMenu {
 
     private final Scanner scanner;
-    private final StudyTracker tracker = new StudyTracker();
+    private final StudyTracker tracker;
 
-    public StudyMenu(Scanner scanner) {
+    public StudyMenu(Scanner scanner, StudyTracker tracker) {
         this.scanner = scanner;
+        this.tracker = tracker;
     }
 
     public void show() {

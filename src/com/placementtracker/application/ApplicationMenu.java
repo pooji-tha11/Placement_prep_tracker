@@ -16,9 +16,9 @@ public class ApplicationMenu {
     private final Scanner scanner;
     private final ApplicationTracker tracker;
 
-    public ApplicationMenu(Scanner scanner, ResumeTracker resumeTracker) {
+    public ApplicationMenu(Scanner scanner, ApplicationTracker tracker) {
         this.scanner = scanner;
-        this.tracker = new ApplicationTracker(resumeTracker);
+        this.tracker = tracker;
     }
 
     public void show() {
@@ -35,9 +35,10 @@ public class ApplicationMenu {
             System.out.println("5. Delete Application");
             System.out.println("6. Export Applications to File");
             System.out.println("7. Import Applications from File");
+            System.out.println("8. Advanced Search");
             System.out.println("0. Back to Main Menu");
 
-            int choice = ConsoleUtil.readIntInRange(scanner, "Enter your choice: ", 0, 7);
+            int choice = ConsoleUtil.readIntInRange(scanner, "Enter your choice: ", 0, 8);
 
             switch (choice) {
                 case 1 -> addApplication();
@@ -47,6 +48,7 @@ public class ApplicationMenu {
                 case 5 -> deleteApplication();
                 case 6 -> exportToFile();
                 case 7 -> importFromFile();
+                case 8 -> advancedSearch();
                 case 0 -> back = true;
             }
         }
@@ -184,6 +186,43 @@ public class ApplicationMenu {
             }
         } catch (java.io.IOException e) {
             System.out.println("Import failed: " + e.getMessage());
+        }
+    }
+        private void advancedSearch() {
+        System.out.println("Leave any field blank to skip that filter.");
+
+        java.util.Set<String> availableSkills = tracker.getAllRequiredSkills();
+        if (!availableSkills.isEmpty()) {
+            System.out.println("Skills mentioned across your applications: " + availableSkills);
+        }
+
+        System.out.print("Company keyword (optional): ");
+        String company = scanner.nextLine().trim();
+        if (company.isEmpty()) company = null;
+
+        ApplicationStatus status = null;
+        System.out.print("Status SAVED/APPLIED/ASSESSMENT/INTERVIEW/REJECTED/SELECTED (optional): ");
+        String statusRaw = scanner.nextLine().trim();
+        if (!statusRaw.isEmpty()) {
+            try {
+                status = ApplicationStatus.valueOf(statusRaw.toUpperCase());
+            } catch (IllegalArgumentException e) {
+                System.out.println("Unrecognized status, ignoring that filter.");
+            }
+        }
+
+        System.out.print("Required skill (optional): ");
+        String skill = scanner.nextLine().trim();
+        if (skill.isEmpty()) skill = null;
+
+        List<JobApplication> results = tracker.advancedSearch(company, status, skill);
+        if (results.isEmpty()) {
+            System.out.println("No applications matched.");
+            return;
+        }
+        for (JobApplication a : results) {
+            System.out.println(a.summary());
+            ConsoleUtil.printDivider();
         }
     }
 }

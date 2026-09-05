@@ -2,6 +2,8 @@ package com.placementtracker.dsa;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 public class DSAService {
 
@@ -50,5 +52,22 @@ public class DSAService {
             total += p.getConfidenceLevel();
         }
         return (double) total / all.size();
+    }
+        public List<Problem> advancedSearch(String tag, Difficulty difficulty, Integer minConfidence) {
+        Predicate<Problem> matchesTag = (tag == null || tag.isBlank())
+                ? p -> true
+                : p -> p.getDsaTag().equalsIgnoreCase(tag);
+
+        Predicate<Problem> matchesDifficulty = (difficulty == null)
+                ? p -> true
+                : p -> p.getDifficulty() == difficulty;
+
+        Predicate<Problem> matchesConfidence = (minConfidence == null)
+                ? p -> true
+                : p -> p.getConfidenceLevel() >= minConfidence;
+
+        return repository.getAll().stream()
+                .filter(matchesTag.and(matchesDifficulty).and(matchesConfidence))
+                .collect(Collectors.toList());
     }
 }

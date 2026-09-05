@@ -9,10 +9,11 @@ import java.util.Scanner;
 public class DSAMenu {
 
     private final Scanner scanner;
-    private final DSATracker tracker = new DSATracker();
+    private final DSATracker tracker;
 
-    public DSAMenu(Scanner scanner) {
+    public DSAMenu(Scanner scanner, DSATracker tracker) {
         this.scanner = scanner;
+        this.tracker = tracker;
     }
 
     public void show() {
@@ -28,9 +29,10 @@ public class DSAMenu {
             System.out.println("4. Filter by Difficulty");
             System.out.println("5. Delete Problem");
             System.out.println("6. View Average Confidence");
+            System.out.println("7. Advanced Search");
             System.out.println("0. Back to Main Menu");
 
-            int choice = ConsoleUtil.readIntInRange(scanner, "Enter your choice: ", 0, 6);
+            int choice = ConsoleUtil.readIntInRange(scanner, "Enter your choice: ", 0, 7);
 
             switch (choice) {
                 case 1 -> addProblem();
@@ -39,6 +41,7 @@ public class DSAMenu {
                 case 4 -> filterByDifficulty();
                 case 5 -> deleteProblem();
                 case 6 -> viewAverageConfidence();
+                case 7 -> advancedSearch();
                 case 0 -> back = true;
             }
         }
@@ -108,5 +111,35 @@ public class DSAMenu {
         for (Problem p : problems) {
             System.out.println(p.summary());
         }
+    }
+        private void advancedSearch() {
+        System.out.println("Leave any field blank to skip that filter.");
+
+        System.out.print("DSA Tag (optional): ");
+        String tag = scanner.nextLine().trim();
+        if (tag.isEmpty()) tag = null;
+
+        Difficulty difficulty = null;
+        System.out.print("Difficulty EASY/MEDIUM/HARD (optional): ");
+        String diffRaw = scanner.nextLine().trim();
+        if (!diffRaw.isEmpty()) {
+            difficulty = DSAValidator.parseDifficulty(diffRaw);
+            if (difficulty == null) {
+                System.out.println("Unrecognized difficulty, ignoring that filter.");
+            }
+        }
+
+        Integer minConfidence = null;
+        System.out.print("Minimum Confidence 1-5 (optional): ");
+        String confRaw = scanner.nextLine().trim();
+        if (!confRaw.isEmpty()) {
+            try {
+                minConfidence = Integer.parseInt(confRaw);
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid number, ignoring that filter.");
+            }
+        }
+
+        printList(tracker.advancedSearch(tag, difficulty, minConfidence));
     }
 }

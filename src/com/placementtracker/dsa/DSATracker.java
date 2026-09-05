@@ -31,4 +31,7 @@ public class DSATracker {
     public double averageConfidence() {
         return service.getAverageConfidence();
     }
+        public List<Problem> advancedSearch(String tag, Difficulty difficulty, Integer minConfidence) {
+        return service.advancedSearch(tag, difficulty, minConfidence);
+    }
 }

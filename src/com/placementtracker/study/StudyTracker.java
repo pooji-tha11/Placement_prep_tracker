@@ -1,4 +1,4 @@
-package com.placementtracker.studystreak;
+package com.placementtracker.study;
 
 import java.time.LocalDate;
 import java.util.List;

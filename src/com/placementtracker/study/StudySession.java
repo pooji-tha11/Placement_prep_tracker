@@ -1,4 +1,4 @@
-package com.placementtracker.studystreak;
+package com.placementtracker.study;
 
 import com.placementtracker.common.model.BaseEntry;
 

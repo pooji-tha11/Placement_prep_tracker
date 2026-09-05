@@ -10,10 +10,11 @@ import java.util.Scanner;
 public class ProjectMenu {
 
     private final Scanner scanner;
-    private final ProjectTracker tracker = new ProjectTracker();
+    private final ProjectTracker tracker;
 
-    public ProjectMenu(Scanner scanner) {
+    public ProjectMenu(Scanner scanner, ProjectTracker tracker) {
         this.scanner = scanner;
+        this.tracker = tracker;
     }
 
     public void show() {
@@ -27,15 +28,17 @@ public class ProjectMenu {
             System.out.println("2. View All Projects");
             System.out.println("3. Delete Project");
             System.out.println("4. STAR Intake Wizard (Interview-Ready Portfolio)");
+            System.out.println("5. Advanced Search");
             System.out.println("0. Back to Main Menu");
 
-            int choice = ConsoleUtil.readIntInRange(scanner, "Enter your choice: ", 0, 4);
+            int choice = ConsoleUtil.readIntInRange(scanner, "Enter your choice: ", 0, 5);
 
             switch (choice) {
                 case 1 -> addProject();
                 case 2 -> viewAll();
                 case 3 -> deleteProject();
                 case 4 -> runStarIntake();
+                case 5 -> advancedSearch();
                 case 0 -> back = true;
             }
         }
@@ -119,6 +122,27 @@ public class ProjectMenu {
                 System.out.println("Submission failed: " + e.getMessage());
                 System.out.println("Let's redo the wizard for this project.");
             }
+        }
+    }
+        private void advancedSearch() {
+        System.out.println("Leave any field blank to skip that filter.");
+
+        System.out.print("Domain (optional): ");
+        String domain = scanner.nextLine().trim();
+        if (domain.isEmpty()) domain = null;
+
+        System.out.print("Technology (optional): ");
+        String technology = scanner.nextLine().trim();
+        if (technology.isEmpty()) technology = null;
+
+        List<Project> results = tracker.advancedSearch(domain, technology);
+        if (results.isEmpty()) {
+            System.out.println("No projects matched.");
+            return;
+        }
+        for (Project p : results) {
+            System.out.println(p.summary());
+            ConsoleUtil.printDivider();
         }
     }
 }

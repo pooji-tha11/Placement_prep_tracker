@@ -7,6 +7,7 @@ import com.placementtracker.resume.ResumeTracker;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Set;
 
 public class ApplicationTracker {
 
@@ -49,5 +50,13 @@ public class ApplicationTracker {
 
     public List<String> importFromCSV(String filePath) throws IOException {
         return service.importFromCSV(filePath);
+    }
+        public List<JobApplication> advancedSearch(String companyKeyword, ApplicationStatus status,
+                                                String requiredSkill) {
+        return service.advancedSearch(companyKeyword, status, requiredSkill);
+    }
+
+    public Set<String> getAllRequiredSkills() {
+        return service.getAllRequiredSkills();
     }
 }

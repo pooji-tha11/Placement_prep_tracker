@@ -1,7 +1,8 @@
 package com.placementtracker.project;
 
 import com.placementtracker.common.exception.IncompleteStarFormException;
-
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 import java.util.List;
 
 public class ProjectService {
@@ -51,5 +52,19 @@ public class ProjectService {
             );
         }
         project.setStarForm(form);
+    }
+        public List<Project> advancedSearch(String domain, String technology) {
+        Predicate<Project> matchesDomain = (domain == null || domain.isBlank())
+                ? p -> true
+                : p -> p.getDomain().equalsIgnoreCase(domain);
+
+        Predicate<Project> matchesTechnology = (technology == null || technology.isBlank())
+                ? p -> true
+                : p -> p.getTechStack().stream()
+                        .anyMatch(tech -> tech.equalsIgnoreCase(technology));
+
+        return repository.getAll().stream()
+                .filter(matchesDomain.and(matchesTechnology))
+                .collect(Collectors.toList());
     }
 }

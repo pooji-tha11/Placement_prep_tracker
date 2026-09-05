@@ -6,7 +6,10 @@ import com.placementtracker.common.exception.InvalidFileDataException;
 import com.placementtracker.common.util.FileUtil;
 import com.placementtracker.resume.Resume;
 import com.placementtracker.resume.ResumeTracker;
-
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
@@ -146,5 +149,30 @@ public class ApplicationService {
 
     private String escape(String value) {
         return value == null ? "" : value.replace(",", ";");
+    }
+        public List<JobApplication> advancedSearch(String companyKeyword, ApplicationStatus status,
+                                                String requiredSkill) {
+        Predicate<JobApplication> matchesCompany = (companyKeyword == null || companyKeyword.isBlank())
+                ? a -> true
+                : a -> a.getCompany().toLowerCase().contains(companyKeyword.toLowerCase());
+
+        Predicate<JobApplication> matchesStatus = (status == null)
+                ? a -> true
+                : a -> a.getStatus() == status;
+
+        Predicate<JobApplication> matchesSkill = (requiredSkill == null || requiredSkill.isBlank())
+                ? a -> true
+                : a -> a.getRequiredSkills().stream()
+                        .anyMatch(skill -> skill.equalsIgnoreCase(requiredSkill));
+
+        return repository.getAll().stream()
+                .filter(matchesCompany.and(matchesStatus).and(matchesSkill))
+                .collect(Collectors.toList());
+    }
+
+    public Set<String> getAllRequiredSkills() {
+        return repository.getAll().stream()
+                .flatMap(a -> a.getRequiredSkills().stream())
+                .collect(Collectors.toCollection(TreeSet::new));
     }
 }

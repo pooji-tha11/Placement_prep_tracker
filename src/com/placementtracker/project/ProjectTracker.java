@@ -28,4 +28,7 @@ public class ProjectTracker {
     public void submitStarForm(String projectId, StarForm form) throws IncompleteStarFormException {
         service.attachStarForm(projectId, form);
     }
+        public List<Project> advancedSearch(String domain, String technology) {
+        return service.advancedSearch(domain, technology);
+    }
 }
