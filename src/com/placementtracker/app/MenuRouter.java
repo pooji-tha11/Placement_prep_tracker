@@ -1,6 +1,7 @@
 package com.placementtracker.app;
 
 import com.placementtracker.achievement.AchievementMenu;
+import com.placementtracker.achievement.AchievementTracker;
 import com.placementtracker.application.ApplicationMenu;
 import com.placementtracker.application.ApplicationTracker;
 import com.placementtracker.common.util.ConsoleUtil;
@@ -26,6 +27,8 @@ public class MenuRouter {
     private final ProjectTracker projectTracker = new ProjectTracker();
     private final ApplicationTracker applicationTracker = new ApplicationTracker(resumeTracker);
     private final StudyTracker studyTracker = new StudyTracker();
+    private final AchievementTracker achievementTracker = new AchievementTracker();
+
 
     public void start() {
         boolean running = true;
@@ -85,10 +88,9 @@ public class MenuRouter {
         new StudyMenu(scanner, studyTracker).show();
     }
 
-    private void routeToAchievement() {
-        new AchievementMenu(scanner).show();
-    }
-
+   private void routeToAchievement() {
+    new AchievementMenu(scanner, achievementTracker).show();
+}
     private void routeToGoal() {
         new GoalMenu(scanner).show();
     }
@@ -98,6 +100,6 @@ public class MenuRouter {
     }
 
     private void routeToReports() {
-        new ReportMenu(scanner, dsaTracker, projectTracker, applicationTracker, studyTracker).show();
-    }
+    new ReportMenu(scanner, dsaTracker, projectTracker, applicationTracker, studyTracker, achievementTracker).show();
+}
 }

@@ -8,6 +8,7 @@ import com.placementtracker.dsa.Difficulty;
 import com.placementtracker.project.ProjectStatus;
 import com.placementtracker.project.ProjectTracker;
 import com.placementtracker.study.StudyTracker;
+import com.placementtracker.achievement.AchievementTracker;
 
 import java.util.List;
 import java.util.Map;
@@ -18,10 +19,16 @@ public class ReportMenu {
     private final Scanner scanner;
     private final ReportTracker tracker;
 
+    private final ReadinessTracker readinessTracker;
+
     public ReportMenu(Scanner scanner, DSATracker dsaTracker, ProjectTracker projectTracker,
-                       ApplicationTracker applicationTracker, StudyTracker studyTracker) {
+                       ApplicationTracker applicationTracker, StudyTracker studyTracker,
+                       AchievementTracker achievementTracker) {
         this.scanner = scanner;
         this.tracker = new ReportTracker(dsaTracker, projectTracker, applicationTracker, studyTracker);
+        this.readinessTracker = new ReadinessTracker(
+                dsaTracker, projectTracker, studyTracker, achievementTracker, applicationTracker
+        );
     }
 
     public void show() {
@@ -35,15 +42,17 @@ public class ReportMenu {
             System.out.println("2. Project Analytics");
             System.out.println("3. Application Analytics");
             System.out.println("4. Study Analytics");
+            System.out.println("5. Placement Readiness Score");
             System.out.println("0. Back to Main Menu");
 
-            int choice = ConsoleUtil.readIntInRange(scanner, "Enter your choice: ", 0, 4);
+            int choice = ConsoleUtil.readIntInRange(scanner, "Enter your choice: ", 0, 5);
 
             switch (choice) {
                 case 1 -> showDsaAnalytics();
                 case 2 -> showProjectAnalytics();
                 case 3 -> showApplicationAnalytics();
                 case 4 -> showStudyAnalytics();
+                case 5 -> showReadinessScore();
                 case 0 -> back = true;
             }
         }
@@ -118,5 +127,19 @@ public class ReportMenu {
         int barLength = maxCount == 0 ? 0 : (int) ((count * 20.0) / maxCount);
         String bar = "#".repeat(Math.max(barLength, count > 0 ? 1 : 0));
         System.out.printf("  %-20s %s (%d)%n", label, bar, count);
+    }
+        private void showReadinessScore() {
+        ConsoleUtil.printDivider();
+        System.out.println("Placement Readiness Score");
+        ConsoleUtil.printDivider();
+
+        System.out.printf("Overall Readiness: %.1f%%%n%n", readinessTracker.overallReadiness());
+
+        Map<String, Double> breakdown = readinessTracker.breakdown();
+        for (Map.Entry<String, Double> entry : breakdown.entrySet()) {
+            int barLength = (int) (entry.getValue() / 5); // scale 0-100 to a 0-20 char bar
+            String bar = "#".repeat(Math.max(barLength, entry.getValue() > 0 ? 1 : 0));
+            System.out.printf("  %-15s %s %.1f%%%n", entry.getKey(), bar, entry.getValue());
+        }
     }
 }

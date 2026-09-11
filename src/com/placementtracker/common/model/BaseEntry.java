@@ -4,14 +4,13 @@ import java.time.LocalDateTime;
 
 public abstract class BaseEntry implements Trackable {
 
-    private static int counter = 1000;
 
     private final String id;
     private final LocalDateTime createdAt;
     protected boolean complete;
 
     protected BaseEntry(String idPrefix) {
-        this.id = idPrefix + "-" + (counter++);
+        this.id = idPrefix + "-" + java.util.UUID.randomUUID();
         this.createdAt = LocalDateTime.now();
         this.complete = false;
     }

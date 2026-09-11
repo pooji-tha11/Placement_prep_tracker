@@ -9,10 +9,11 @@ import java.util.Scanner;
 public class AchievementMenu {
 
     private final Scanner scanner;
-    private final AchievementTracker tracker = new AchievementTracker();
+    private final AchievementTracker tracker;
 
-    public AchievementMenu(Scanner scanner) {
+    public AchievementMenu(Scanner scanner, AchievementTracker tracker) {
         this.scanner = scanner;
+        this.tracker = tracker;
     }
 
     public void show() {
