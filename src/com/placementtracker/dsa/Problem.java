@@ -3,6 +3,7 @@ package com.placementtracker.dsa;
 import com.placementtracker.common.model.BaseEntry;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 public class Problem extends BaseEntry {
 
@@ -12,6 +13,7 @@ public class Problem extends BaseEntry {
     private final int confidenceLevel;
     private final LocalDate solvedDate;
 
+    // Used when creating a brand-new problem entry — generates a fresh UUID via BaseEntry.
     public Problem(String platform, String dsaTag, Difficulty difficulty,
                    int confidenceLevel, LocalDate solvedDate) {
         super("PROB");
@@ -20,7 +22,19 @@ public class Problem extends BaseEntry {
         this.difficulty = difficulty;
         this.confidenceLevel = confidenceLevel;
         this.solvedDate = solvedDate;
-        this.complete = true; // a logged problem is, by definition, solved
+        this.complete = true;
+    }
+
+    // Used when reconstructing a Problem from a database row.
+    public Problem(String id, String platform, String dsaTag, Difficulty difficulty,
+                   int confidenceLevel, LocalDate solvedDate, LocalDateTime createdAt) {
+        super(id, true);
+        this.platform = platform;
+        this.dsaTag = dsaTag;
+        this.difficulty = difficulty;
+        this.confidenceLevel = confidenceLevel;
+        this.solvedDate = solvedDate;
+        this.complete = true;
     }
 
     public String getPlatform() {

@@ -3,6 +3,7 @@ package com.placementtracker.goal;
 import com.placementtracker.common.model.Trackable;
 
 import java.time.LocalDate;
+import java.util.UUID;
 
 public class Goal<T extends Trackable> {
 
@@ -12,13 +13,21 @@ public class Goal<T extends Trackable> {
     private int currentCount;
     private final LocalDate deadline;
 
-    private static int counter = 1000;
-
+    // Used when creating a brand-new goal — generates a fresh UUID.
     public Goal(String description, int targetCount, LocalDate deadline) {
-        this.id = "GOAL-" + (counter++);
+        this.id = "GOAL-" + UUID.randomUUID();
         this.description = description;
         this.targetCount = targetCount;
         this.currentCount = 0;
+        this.deadline = deadline;
+    }
+
+    // Used when reconstructing a Goal from a database row.
+    public Goal(String id, String description, int targetCount, int currentCount, LocalDate deadline) {
+        this.id = id;
+        this.description = description;
+        this.targetCount = targetCount;
+        this.currentCount = currentCount;
         this.deadline = deadline;
     }
 

@@ -2,6 +2,7 @@ package com.placementtracker.project;
 
 import com.placementtracker.common.model.BaseEntry;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 public class Project extends BaseEntry {
@@ -13,6 +14,7 @@ public class Project extends BaseEntry {
     private final ProjectStatus status;
     private StarForm starForm;
 
+    // Used when creating a brand-new project — generates a fresh UUID via BaseEntry.
     public Project(String title, String domain, List<String> techStack,
                     String repoLink, ProjectStatus status) {
         super("PROJ");
@@ -22,6 +24,19 @@ public class Project extends BaseEntry {
         this.repoLink = repoLink;
         this.status = status;
         this.starForm = null;
+        this.complete = (status == ProjectStatus.COMPLETED);
+    }
+
+    // Used when reconstructing a Project from a database row.
+    public Project(String id, String title, String domain, List<String> techStack,
+                    String repoLink, ProjectStatus status, StarForm starForm) {
+        super(id, true);
+        this.title = title;
+        this.domain = domain;
+        this.techStack = techStack;
+        this.repoLink = repoLink;
+        this.status = status;
+        this.starForm = starForm;
         this.complete = (status == ProjectStatus.COMPLETED);
     }
 

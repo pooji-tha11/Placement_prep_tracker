@@ -2,14 +2,24 @@ package com.placementtracker.achievement;
 
 import com.placementtracker.common.model.BaseEntry;
 
+import java.time.LocalDateTime;
+
 public class AchievementEntry extends BaseEntry {
 
     private final Achievement achievement;
 
+    // Used when creating a brand-new achievement entry — generates a fresh UUID via BaseEntry.
     public AchievementEntry(Achievement achievement) {
         super("ACH");
         this.achievement = achievement;
-        this.complete = true; // a recorded achievement is complete by definition
+        this.complete = true;
+    }
+
+    // Used when reconstructing an AchievementEntry from a database row.
+    public AchievementEntry(String id, Achievement achievement, LocalDateTime createdAt) {
+        super(id, true);
+        this.achievement = achievement;
+        this.complete = true;
     }
 
     public Achievement getAchievement() {

@@ -36,12 +36,12 @@ public class StudyService {
         return streak;
     }
 
-    public int getLongestStreak() {
+        public int getLongestStreak() {
         int longest = 0;
         int current = 0;
         LocalDate previous = null;
 
-        for (LocalDate date : repository.getDatesAscending()) {
+        for (LocalDate date : repository.getDistinctDatesAscending()) {
             if (previous != null && date.equals(previous.plusDays(1))) {
                 current++;
             } else {
@@ -61,16 +61,14 @@ public class StudyService {
         return total;
     }
 
-    public int getWeeklyStudyMinutes() {
+        public int getWeeklyStudyMinutes() {
         LocalDate today = LocalDate.now();
-        LocalDate weekAgo = today.minusDays(6); // inclusive 7-day window
+        LocalDate weekAgo = today.minusDays(6);
 
         int total = 0;
-        Map<LocalDate, List<StudySession>> weekSessions = repository.getSessionsBetween(weekAgo, today);
-        for (List<StudySession> sessionsOnDate : weekSessions.values()) {
-            for (StudySession s : sessionsOnDate) {
-                total += s.getDurationMinutes();
-            }
+        List<StudySession> weekSessions = repository.getSessionsBetween(weekAgo, today);
+        for (StudySession session : weekSessions) {
+            total += session.getDurationMinutes();
         }
         return total;
     }

@@ -23,7 +23,7 @@ public class GoalService {
         return goal;
     }
 
-    public boolean updateProgress(String goalId, int currentCount) {
+        public boolean updateProgress(String goalId, int currentCount) {
         Goal<?> goal = repository.findById(goalId);
         if (goal == null) {
             return false;
@@ -31,8 +31,7 @@ public class GoalService {
         if (currentCount < 0) {
             throw new IllegalArgumentException("Current count cannot be negative.");
         }
-        goal.updateProgress(currentCount);
-        return true;
+        return repository.updateProgress(goalId, currentCount);
     }
 
     public List<Goal<?>> listAll() {

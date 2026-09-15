@@ -9,11 +9,20 @@ public class FocusSession extends BaseEntry {
     private final String topic;
     private final int durationMinutes;
 
+    // Used when creating a brand-new focus session — generates a fresh UUID via BaseEntry.
     public FocusSession(String topic, int durationMinutes) {
         super("FOCUS");
         this.topic = topic;
         this.durationMinutes = durationMinutes;
-        this.complete = true; // only ever recorded after the session finishes running
+        this.complete = true;
+    }
+
+    // Used when reconstructing a FocusSession from a database row.
+    public FocusSession(String id, String topic, int durationMinutes, LocalDateTime createdAt) {
+        super(id, true);
+        this.topic = topic;
+        this.durationMinutes = durationMinutes;
+        this.complete = true;
     }
 
     public String getTopic() {

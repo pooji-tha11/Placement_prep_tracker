@@ -8,5 +8,5 @@ public final class DatabaseConfig {
 
     public static final String URL = "jdbc:mysql://localhost:3306/placement_tracker";
     public static final String USERNAME = "root";
-    public static final String PASSWORD = "REPLACE_ME_LOCALLY"; // set during mysql_secure_installation
+    public static final String PASSWORD = "INSERT_YOUR_PASSWORD"; // set during mysql_secure_installation
 }

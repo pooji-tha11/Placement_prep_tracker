@@ -32,6 +32,23 @@ public class JobApplication extends BaseEntry {
         this.resumeId = resumeId;
         this.complete = (status == ApplicationStatus.SELECTED);
     }
+        // Used when reconstructing a JobApplication from a database row.
+    public JobApplication(String id, String company, String role, LocalDate dateApplied,
+                           ApplicationStatus status, String jobLink, String jobDescription,
+                           List<String> requiredSkills, String notes, String resumeId,
+                           java.time.LocalDateTime createdAt) {
+        super(id, true);
+        this.company = company;
+        this.role = role;
+        this.dateApplied = dateApplied;
+        this.status = status;
+        this.jobLink = jobLink;
+        this.jobDescription = jobDescription;
+        this.requiredSkills = requiredSkills;
+        this.notes = notes;
+        this.resumeId = resumeId;
+        this.complete = (status == ApplicationStatus.SELECTED);
+    }
 
     public String getCompany() {
         return company;

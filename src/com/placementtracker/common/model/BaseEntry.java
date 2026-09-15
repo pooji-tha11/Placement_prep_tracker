@@ -14,6 +14,11 @@ public abstract class BaseEntry implements Trackable {
         this.createdAt = LocalDateTime.now();
         this.complete = false;
     }
+        protected BaseEntry(String id, boolean isExistingId) {
+        this.id = id;
+        this.createdAt = java.time.LocalDateTime.now(); // overwritten by caller when reconstructing from DB
+        this.complete = false;
+    }
 
     @Override
     public String getId() {

@@ -41,7 +41,7 @@ public class ProjectService {
         return repository.deleteById(id);
     }
 
-    public void attachStarForm(String projectId, StarForm form) throws IncompleteStarFormException {
+        public void attachStarForm(String projectId, StarForm form) throws IncompleteStarFormException {
         Project project = repository.findById(projectId);
         if (project == null) {
             throw new IllegalArgumentException("No project found with ID: " + projectId);
@@ -51,7 +51,7 @@ public class ProjectService {
                     "STAR form is incomplete — all four fields (Situation, Task, Action, Result) are required."
             );
         }
-        project.setStarForm(form);
+        repository.updateStarForm(projectId, form);
     }
         public List<Project> advancedSearch(String domain, String technology) {
         Predicate<Project> matchesDomain = (domain == null || domain.isBlank())

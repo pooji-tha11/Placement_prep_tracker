@@ -3,6 +3,7 @@ package com.placementtracker.resume;
 import com.placementtracker.common.model.BaseEntry;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 public class Resume extends BaseEntry {
 
@@ -11,13 +12,26 @@ public class Resume extends BaseEntry {
     private final String filename;
     private final LocalDate dateAdded;
 
+    // Used when creating a brand-new resume — generates a fresh UUID via BaseEntry.
     public Resume(String label, String version, String filename, LocalDate dateAdded) {
         super("RES");
         this.label = label;
         this.version = version;
         this.filename = filename;
         this.dateAdded = dateAdded;
-        this.complete = true; // a saved resume record is complete by definition
+        this.complete = true;
+    }
+
+    // Used when reconstructing a Resume from a database row, where the id and
+    // createdAt already exist and must be preserved exactly, not regenerated.
+    public Resume(String id, String label, String version, String filename,
+                  LocalDate dateAdded, LocalDateTime createdAt) {
+        super(id, true);
+        this.label = label;
+        this.version = version;
+        this.filename = filename;
+        this.dateAdded = dateAdded;
+        this.complete = true;
     }
 
     public String getLabel() {
