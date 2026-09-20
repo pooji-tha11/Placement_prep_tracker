@@ -1,0 +1,40 @@
+package com.placementtracker.resume;
+
+import com.placementtracker.common.exception.DuplicateResumeException;
+import java.io.IOException;
+import java.time.LocalDate;
+import java.util.List;
+
+@org.springframework.stereotype.Service
+public class ResumeTracker {
+
+    private final ResumeService service = new ResumeService();
+
+    public Resume addResume(String label, String version, String filename, LocalDate dateAdded)
+            throws DuplicateResumeException {
+        return service.addResume(label, version, filename, dateAdded);
+    }
+
+    public List<Resume> viewAll() {
+        return service.listAll();
+    }
+
+    public Resume viewById(String id) {
+        return service.findById(id);
+    }
+
+    public boolean removeResume(String id) {
+        return service.deleteResume(id);
+    }
+
+    public boolean resumeExists(String id) {
+        return service.exists(id);
+    }
+        public void exportToCSV(String filePath) throws IOException {
+        service.exportToCSV(filePath);
+    }
+
+    public List<String> importFromCSV(String filePath) throws IOException {
+        return service.importFromCSV(filePath);
+    }
+}

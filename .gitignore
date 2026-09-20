@@ -10,3 +10,7 @@ bin/
 
 # Logs
 *.log
+
+# Maven
+target/
+
