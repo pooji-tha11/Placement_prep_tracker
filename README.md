@@ -1,6 +1,3 @@
-Here is a comprehensive and structured `README.md` for your Placement Preparation Tracker project. You can copy and paste this directly into your `README.md` file!
-
-```markdown
 # 🎓 Placement Preparation Tracker (PrepSphere)
 
 A comprehensive, full-stack web application designed to help students and job seekers track their placement journey. PrepSphere brings all your preparation metrics—from DSA problem-solving and project building to job applications and focus timers—under one unified dashboard.
