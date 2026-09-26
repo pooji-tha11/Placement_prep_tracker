@@ -1,7 +1,10 @@
 package com.placementtracker.resume;
 
-import com.placementtracker.common.exception.DuplicateResumeException;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.http.ResponseEntity;
+import org.springframework.core.io.Resource;
+import org.springframework.http.MediaType;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -30,15 +33,47 @@ public class ResumeController {
         return resume;
     }
 
-    @PostMapping
-    public Resume create(@RequestBody CreateResumeRequest req) throws DuplicateResumeException {
-        return tracker.addResume(req.label(), req.version(), req.filename(), req.dateAdded());
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public Resume create(
+            @RequestParam("label") String label,
+            @RequestParam("version") String version,
+            @RequestParam("dateAdded") LocalDate dateAdded,
+            @RequestParam(value = "file", required = false) MultipartFile file
+    ) throws Exception {
+        return tracker.addResume(label, version, dateAdded, file);
     }
 
     @DeleteMapping("/{id}")
-    public void delete(@PathVariable String id) {
-        tracker.removeResume(id);
+    public ResponseEntity<?> delete(@PathVariable String id) {
+        try {
+            boolean removed = tracker.removeResume(id);
+            if (removed) {
+                return ResponseEntity.ok().build();
+            } else {
+                return ResponseEntity.notFound().build();
+            }
+        } catch (Exception e) {
+            if (e.getMessage() != null && e.getMessage().toLowerCase().contains("foreign key")) {
+                return ResponseEntity.badRequest().body("Cannot delete this resume because it is linked to one or more applications.");
+            }
+            return ResponseEntity.internalServerError().body("An error occurred while deleting the resume.");
+        }
     }
 
-    public record CreateResumeRequest(String label, String version, String filename, LocalDate dateAdded) {}
+    @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public Resume update(
+            @PathVariable String id,
+            @RequestParam("label") String label,
+            @RequestParam("version") String version,
+            @RequestParam("dateAdded") LocalDate dateAdded,
+            @RequestParam(value = "file", required = false) MultipartFile file
+    ) throws Exception {
+        return tracker.updateResume(id, label, version, dateAdded, file);
+    }
+    
+    @GetMapping("/{id}/file")
+    public ResponseEntity<Resource> download(@PathVariable String id) throws Exception {
+        return tracker.downloadResumeFile(id);
+    }
+
 }

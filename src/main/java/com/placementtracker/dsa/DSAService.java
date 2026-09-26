@@ -70,4 +70,13 @@ public class DSAService {
                 .filter(matchesTag.and(matchesDifficulty).and(matchesConfidence))
                 .collect(Collectors.toList());
     }
+
+    public Problem updateProblem(String id, String platform, String dsaTag, Difficulty difficulty, int confidenceLevel, java.time.LocalDate solvedDate) {
+        Problem p = repository.findById(id);
+        if (p == null) throw new IllegalArgumentException("Problem not found");
+        Problem updated = new Problem(id, platform, dsaTag, difficulty, confidenceLevel, solvedDate, p.getCreatedAt());
+        repository.update(updated);
+        return updated;
+    }
+
 }

@@ -35,4 +35,9 @@ public class DSATracker {
         public List<Problem> advancedSearch(String tag, Difficulty difficulty, Integer minConfidence) {
         return service.advancedSearch(tag, difficulty, minConfidence);
     }
+
+    public Problem updateProblem(String id, String platform, String dsaTag, Difficulty difficulty, int confidenceLevel, java.time.LocalDate solvedDate) {
+        return service.updateProblem(id, platform, dsaTag, difficulty, confidenceLevel, solvedDate);
+    }
+
 }

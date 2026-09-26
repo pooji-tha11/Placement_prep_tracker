@@ -7,6 +7,7 @@ export default function Focus() {
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [formData, setFormData] = useState({ topic: '', durationMinutes: '25' });
+  const [isCustom, setIsCustom] = useState(false);
   
   // Timer state
   const [activeTimer, setActiveTimer] = useState(null);
@@ -45,6 +46,7 @@ export default function Focus() {
       await api.post('/focus-sessions', { topic: formData.topic, durationMinutes: duration });
       setShowModal(false);
       setFormData({ topic: '', durationMinutes: '25' });
+      setIsCustom(false);
       
       // Start local countdown
       setActiveTimer(formData.topic);
@@ -113,15 +115,49 @@ export default function Focus() {
               </div>
               <div>
                 <label className="block text-sm font-medium text-ink mb-1">Duration (minutes)</label>
-                <select className="w-full p-2 rounded-2xl bg-surfaceAlt border border-border" value={formData.durationMinutes} onChange={e => setFormData({...formData, durationMinutes: e.target.value})}>
-                  <option value="15">15 minutes</option>
-                  <option value="25">25 minutes (Pomodoro)</option>
-                  <option value="45">45 minutes</option>
-                  <option value="60">60 minutes</option>
-                </select>
+                {!isCustom ? (
+                  <select 
+                    className="w-full p-2 rounded-2xl bg-surfaceAlt border border-border" 
+                    value={formData.durationMinutes} 
+                    onChange={e => {
+                      if (e.target.value === 'custom') {
+                        setIsCustom(true);
+                        setFormData({...formData, durationMinutes: ''});
+                      } else {
+                        setFormData({...formData, durationMinutes: e.target.value});
+                      }
+                    }}
+                  >
+                    <option value="15">15 minutes</option>
+                    <option value="25">25 minutes (Pomodoro)</option>
+                    <option value="45">45 minutes</option>
+                    <option value="60">60 minutes</option>
+                    <option value="custom">Custom time...</option>
+                  </select>
+                ) : (
+                  <div className="flex space-x-2">
+                    <input 
+                      required 
+                      type="number" 
+                      min="1" 
+                      max="1440" 
+                      placeholder="e.g. 30"
+                      className="w-full p-2 rounded-2xl bg-surfaceAlt border border-border" 
+                      value={formData.durationMinutes} 
+                      onChange={e => setFormData({...formData, durationMinutes: e.target.value})} 
+                    />
+                    <button 
+                      type="button" 
+                      onClick={() => { setIsCustom(false); setFormData({...formData, durationMinutes: '25'}); }}
+                      className="px-3 py-2 rounded-2xl bg-surfaceAlt text-inkMuted hover:bg-border text-sm"
+                    >
+                      Presets
+                    </button>
+                  </div>
+                )}
               </div>
               <div className="flex justify-end space-x-3 mt-6">
-                <button type="button" onClick={() => setShowModal(false)} className="px-4 py-2 rounded-2xl bg-surfaceAlt text-ink hover:bg-border">Cancel</button>
+                <button type="button" onClick={() => { setShowModal(false); setIsCustom(false); setFormData({ topic: '', durationMinutes: '25' }); }} className="px-4 py-2 rounded-2xl bg-surfaceAlt text-ink hover:bg-border">Cancel</button>
                 <button type="submit" className="px-4 py-2 rounded-2xl bg-plum text-white hover:bg-plumDark">Start</button>
               </div>
             </form>

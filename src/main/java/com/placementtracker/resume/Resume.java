@@ -11,52 +11,53 @@ public class Resume extends BaseEntry {
     private final String version;
     private final String filename;
     private final LocalDate dateAdded;
+    
+    private final String storedFileName;
+    private final String originalFileName;
+    private final String contentType;
+    private final Long fileSizeBytes;
 
-    // Used when creating a brand-new resume — generates a fresh UUID via BaseEntry.
-    public Resume(String label, String version, String filename, LocalDate dateAdded) {
+    public Resume(String label, String version, String filename, LocalDate dateAdded,
+                  String storedFileName, String originalFileName, String contentType, Long fileSizeBytes) {
         super("RES");
         this.label = label;
         this.version = version;
         this.filename = filename;
         this.dateAdded = dateAdded;
+        this.storedFileName = storedFileName;
+        this.originalFileName = originalFileName;
+        this.contentType = contentType;
+        this.fileSizeBytes = fileSizeBytes;
         this.complete = true;
     }
 
-    // Used when reconstructing a Resume from a database row, where the id and
-    // createdAt already exist and must be preserved exactly, not regenerated.
     public Resume(String id, String label, String version, String filename,
-                  LocalDate dateAdded, LocalDateTime createdAt) {
+                  LocalDate dateAdded, LocalDateTime createdAt,
+                  String storedFileName, String originalFileName, String contentType, Long fileSizeBytes) {
         super(id, true);
         this.label = label;
         this.version = version;
         this.filename = filename;
         this.dateAdded = dateAdded;
+        this.storedFileName = storedFileName;
+        this.originalFileName = originalFileName;
+        this.contentType = contentType;
+        this.fileSizeBytes = fileSizeBytes;
         this.complete = true;
     }
 
-    public String getLabel() {
-        return label;
-    }
-
-    public String getVersion() {
-        return version;
-    }
-
-    public String getFilename() {
-        return filename;
-    }
-
-    public LocalDate getDateAdded() {
-        return dateAdded;
-    }
+    public String getLabel() { return label; }
+    public String getVersion() { return version; }
+    public String getFilename() { return filename; }
+    public LocalDate getDateAdded() { return dateAdded; }
+    
+    public String getStoredFileName() { return storedFileName; }
+    public String getOriginalFileName() { return originalFileName; }
+    public String getContentType() { return contentType; }
+    public Long getFileSizeBytes() { return fileSizeBytes; }
 
     @Override
     public String summary() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("[").append(getId()).append("] ");
-        sb.append(label).append(" (").append(version).append(")");
-        sb.append(" — File: ").append(filename);
-        sb.append(", Added: ").append(dateAdded);
-        return sb.toString();
+        return "[" + getId() + "] " + label + " (" + version + ") — File: " + filename + ", Added: " + dateAdded;
     }
 }

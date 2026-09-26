@@ -149,4 +149,44 @@ public class AchievementRepository {
                 rs.getTimestamp("created_at").toLocalDateTime()
         );
     }
+
+    public boolean update(AchievementEntry a) {
+        String sql = "UPDATE achievements SET name = ?, achievement_date = ?, organizer = ?, result = ?, issuing_org = ?, rank_label = ? WHERE id = ?";
+        try (java.sql.Connection conn = com.placementtracker.database.DatabaseConnection.getConnection();
+             java.sql.PreparedStatement stmt = conn.prepareStatement(sql)) {
+             
+            Achievement ach = a.getAchievement();
+            switch (ach) {
+                case Hackathon h -> {
+                    stmt.setString(1, h.name());
+                    stmt.setDate(2, java.sql.Date.valueOf(h.date()));
+                    stmt.setString(3, h.organizer());
+                    stmt.setString(4, h.result());
+                    stmt.setNull(5, java.sql.Types.VARCHAR);
+                    stmt.setNull(6, java.sql.Types.VARCHAR);
+                }
+                case Certification c -> {
+                    stmt.setString(1, c.name());
+                    stmt.setDate(2, java.sql.Date.valueOf(c.date()));
+                    stmt.setNull(3, java.sql.Types.VARCHAR);
+                    stmt.setNull(4, java.sql.Types.VARCHAR);
+                    stmt.setString(5, c.issuingOrg());
+                    stmt.setNull(6, java.sql.Types.VARCHAR);
+                }
+                case CompetitionAward ca -> {
+                    stmt.setString(1, ca.competitionName());
+                    stmt.setDate(2, java.sql.Date.valueOf(ca.date()));
+                    stmt.setNull(3, java.sql.Types.VARCHAR);
+                    stmt.setNull(4, java.sql.Types.VARCHAR);
+                    stmt.setNull(5, java.sql.Types.VARCHAR);
+                    stmt.setString(6, ca.rank());
+                }
+            }
+            stmt.setString(7, a.getId());
+            return stmt.executeUpdate() > 0;
+        } catch (java.sql.SQLException e) {
+            throw new RuntimeException("Failed to update achievement: " + e.getMessage(), e);
+        }
+    }
+
 }

@@ -75,4 +75,13 @@ public class ProjectService {
                 .filter(matchesDomain.and(matchesTechnology))
                 .collect(Collectors.toList());
     }
+
+    public Project updateProject(String id, String title, String domain, java.util.List<String> techStack, String repoLink, ProjectStatus status) {
+        Project p = repository.findById(id);
+        if (p == null) throw new IllegalArgumentException("Project not found");
+        Project updated = new Project(id, title, domain, techStack, repoLink, status, p.getStarForm());
+        repository.update(updated);
+        return updated;
+    }
+
 }

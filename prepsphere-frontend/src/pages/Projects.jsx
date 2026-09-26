@@ -1,14 +1,17 @@
 import { useState } from 'react';
 import { useApi } from '../hooks/useApi';
-import { FiTrash2, FiPlus, FiFolder, FiSearch, FiChevronDown, FiChevronUp, FiStar, FiCheckCircle, FiArrowRight, FiExternalLink } from 'react-icons/fi';
+import { FiTrash2, FiPlus, FiFolder, FiSearch, FiChevronDown, FiChevronUp, FiStar, FiCheckCircle, FiArrowRight, FiExternalLink, FiMaximize2, FiCpu } from 'react-icons/fi';
 import { api } from '../api/client';
+import DetailModal from '../components/DetailModal';
+import ProjectForm from '../components/ProjectForm';
 
 export default function Projects() {
-  const { data: projects, loading, deleteData, fetchData, postData } = useApi('/projects');
+  const { data: projects, loading, deleteData, fetchData, postData, putData } = useApi('/projects');
   const [showModal, setShowModal] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
   const [searchParams, setSearchParams] = useState({ domain: '', technology: '' });
-  const [formData, setFormData] = useState({ title: '', domain: '', techStack: '', repoLink: '', status: 'PLANNED' });
+  const [editingRecord, setEditingRecord] = useState(null);
+  const [viewDetail, setViewDetail] = useState(null);
 
   // STAR Wizard State
   const [starWizardProj, setStarWizardProj] = useState(null);
@@ -16,6 +19,11 @@ export default function Projects() {
   const [starData, setStarData] = useState({ situation: '', task: '', action: '', result: '' });
   const [starError, setStarError] = useState('');
   const [viewStarProj, setViewStarProj] = useState(null);
+
+  // AI states
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiSuggestion, setAiSuggestion] = useState(null);
+  const [aiScore, setAiScore] = useState(null);
 
   const handleSearch = (e) => {
     e.preventDefault();
@@ -30,12 +38,15 @@ export default function Projects() {
     fetchData('/projects');
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const handleSave = async (data) => {
     try {
-      await postData('/projects', { ...formData, techStack: formData.techStack.split(',').map(s=>s.trim()).filter(Boolean) });
+      if (editingRecord) {
+        await putData(`/projects/${editingRecord.id}`, data);
+      } else {
+        await postData('/projects', data);
+      }
       setShowModal(false);
-      setFormData({ title: '', domain: '', techStack: '', repoLink: '', status: 'PLANNED' });
+      setEditingRecord(null);
     } catch (err) {
       alert(err.message);
     }
@@ -55,6 +66,7 @@ export default function Projects() {
     } else {
       setStarData({ situation: '', task: '', action: '', result: '' });
     }
+    setAiSuggestion(null);
   };
 
   const handleStatusChange = async (id, newStatus) => {
@@ -77,6 +89,36 @@ export default function Projects() {
     }
   };
 
+  const handleImproveField = async () => {
+    const steps = ['situation', 'task', 'action', 'result'];
+    const currentKey = steps[starStep];
+    const currentText = starData[currentKey];
+    if (!currentText.trim()) return;
+    
+    setAiLoading(true);
+    setStarError('');
+    try {
+      const res = await api.post(`/projects/${starWizardProj.id}/star/improve`, { field: currentKey, text: currentText });
+      setAiSuggestion(res.suggestion);
+    } catch (err) {
+      setStarError('AI Error: ' + err.message);
+    } finally {
+      setAiLoading(false);
+    }
+  };
+
+  const handleScoreStar = async () => {
+    setAiLoading(true);
+    try {
+      const res = await api.post(`/projects/${viewStarProj.id}/star/score`, viewStarProj.starForm);
+      setAiScore(res);
+    } catch (err) {
+      alert('AI Error: ' + err.message);
+    } finally {
+      setAiLoading(false);
+    }
+  };
+
   const renderStarStep = () => {
     const steps = ['situation', 'task', 'action', 'result'];
     const currentKey = steps[starStep];
@@ -95,15 +137,54 @@ export default function Projects() {
           className="w-full p-3 rounded-2xl bg-surfaceAlt border border-border focus:border-plum h-32 outline-none"
           placeholder={`Describe the ${titles[starStep].toLowerCase()}...`}
           value={starData[currentKey]}
-          onChange={e => setStarData({...starData, [currentKey]: e.target.value})}
+          onChange={e => {
+            setStarData({...starData, [currentKey]: e.target.value});
+            setAiSuggestion(null);
+          }}
         />
+        <div className="flex justify-end">
+          <button 
+            onClick={handleImproveField} 
+            disabled={!starData[currentKey]?.trim() || aiLoading}
+            className={`flex items-center px-3 py-1.5 text-sm rounded-xl transition-colors ${
+              !starData[currentKey]?.trim() || aiLoading ? 'bg-surfaceAlt text-inkMuted' : 'bg-plum/10 text-plum hover:bg-plum/20'
+            }`}
+          >
+            <FiCpu className="mr-1.5" /> {aiLoading ? 'Improving...' : 'Improve with AI'}
+          </button>
+        </div>
+        
+        {aiSuggestion && (
+          <div className="mt-4 p-4 bg-plum/5 rounded-2xl border border-plum/20">
+            <h4 className="text-sm font-semibold text-plum mb-2">Suggested Rewrite:</h4>
+            <p className="text-sm text-ink mb-3">{aiSuggestion}</p>
+            <div className="flex space-x-2">
+              <button 
+                onClick={() => {
+                  setStarData({...starData, [currentKey]: aiSuggestion});
+                  setAiSuggestion(null);
+                }}
+                className="px-3 py-1.5 text-xs bg-plum text-white rounded-lg hover:bg-plumDark"
+              >
+                Accept
+              </button>
+              <button 
+                onClick={() => setAiSuggestion(null)}
+                className="px-3 py-1.5 text-xs bg-surfaceAlt text-ink rounded-lg hover:bg-border border border-border"
+              >
+                Discard
+              </button>
+            </div>
+          </div>
+        )}
+
         <div className="flex justify-between mt-6">
-          <button onClick={() => { if(starStep > 0) setStarStep(s=>s-1); else setStarWizardProj(null); }} className="px-4 py-2 text-ink hover:bg-surfaceAlt rounded-2xl transition-colors">
+          <button onClick={() => { if(starStep > 0) { setStarStep(s=>s-1); setAiSuggestion(null); } else setStarWizardProj(null); }} className="px-4 py-2 text-ink hover:bg-surfaceAlt rounded-2xl transition-colors">
             {starStep === 0 ? 'Cancel' : 'Back'}
           </button>
           <button 
             onClick={() => {
-              if (starStep < 3) setStarStep(s=>s+1);
+              if (starStep < 3) { setStarStep(s=>s+1); setAiSuggestion(null); }
               else submitStar();
             }}
             className="px-4 py-2 bg-plum text-white rounded-2xl flex items-center hover:bg-plumDark transition-colors"
@@ -119,7 +200,7 @@ export default function Projects() {
     <div className="max-w-5xl mx-auto space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-bold text-plum">Projects</h1>
-        <button onClick={() => setShowModal(true)} className="bg-plum hover:bg-plumDark text-white px-4 py-2 rounded-2xl flex items-center shadow-sm">
+        <button onClick={() => { setEditingRecord(null); setShowModal(true); }} className="bg-plum hover:bg-plumDark text-white px-4 py-2 rounded-2xl flex items-center shadow-sm">
           <FiPlus className="mr-2" /> Add Project
         </button>
       </div>
@@ -157,7 +238,10 @@ export default function Projects() {
                         )}
                       </h3>
                     </div>
-                    <button onClick={() => window.confirm("Delete?") && deleteData(`/projects/${p.id}`)} className="p-2 text-danger opacity-0 lg:group-hover:opacity-100 bg-white rounded-full hover:bg-danger hover:text-white transition-all"><FiTrash2 size={16} /></button>
+                    <div className="flex space-x-2">
+                      <button onClick={() => setViewDetail(p)} className="p-2 text-inkMuted opacity-0 lg:group-hover:opacity-100 bg-white rounded-full hover:bg-surface hover:text-ink transition-all"><FiMaximize2 size={16} /></button>
+                      <button onClick={() => window.confirm("Delete?") && deleteData(`/projects/${p.id}`)} className="p-2 text-danger opacity-0 lg:group-hover:opacity-100 bg-white rounded-full hover:bg-danger hover:text-white transition-all"><FiTrash2 size={16} /></button>
+                    </div>
                   </div>
                   <div className="text-sm text-inkMuted mb-2 flex items-center space-x-2">
                     <span>{p.domain} • Status:</span>
@@ -183,7 +267,7 @@ export default function Projects() {
                   {p.starForm?.complete ? (
                     <div className="flex items-center space-x-2">
                       <span className="text-xs bg-success/20 text-[#6a8756] px-2 py-1 rounded-full flex items-center font-medium"><FiCheckCircle className="mr-1"/> Interview-Ready</span>
-                      <button onClick={() => setViewStarProj(p)} className="text-xs text-inkMuted hover:text-plum font-medium underline">View STAR</button>
+                      <button onClick={() => { setViewStarProj(p); setAiScore(null); }} className="text-xs text-inkMuted hover:text-plum font-medium underline">View STAR</button>
                     </div>
                   ) : (
                     <span className="text-xs text-inkMuted bg-surface px-2 py-1 rounded-full border border-border">STAR incomplete</span>
@@ -201,23 +285,12 @@ export default function Projects() {
       {showModal && (
         <div className="fixed inset-0 bg-ink/20 flex items-center justify-center z-50 p-4">
           <div className="bg-surface p-6 rounded-3xl shadow-lg border border-border w-full max-w-md">
-            <h2 className="text-2xl font-bold text-plum mb-4">Add Project</h2>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div><label className="block text-sm mb-1">Title</label><input required type="text" className="w-full p-2 rounded-2xl bg-surfaceAlt border" value={formData.title} onChange={e => setFormData({...formData, title: e.target.value})} /></div>
-              <div><label className="block text-sm mb-1">Domain</label><input required type="text" className="w-full p-2 rounded-2xl bg-surfaceAlt border" value={formData.domain} onChange={e => setFormData({...formData, domain: e.target.value})} /></div>
-              <div><label className="block text-sm mb-1">Tech Stack (comma separated)</label><input required type="text" className="w-full p-2 rounded-2xl bg-surfaceAlt border" value={formData.techStack} onChange={e => setFormData({...formData, techStack: e.target.value})} /></div>
-              <div><label className="block text-sm mb-1">Repository Link</label><input required type="url" className="w-full p-2 rounded-2xl bg-surfaceAlt border" value={formData.repoLink} onChange={e => setFormData({...formData, repoLink: e.target.value})} /></div>
-              <div>
-                <label className="block text-sm mb-1">Status</label>
-                <select className="w-full p-2 rounded-2xl bg-surfaceAlt border" value={formData.status} onChange={e => setFormData({...formData, status: e.target.value})}>
-                  <option value="PLANNED">Planned</option><option value="IN_PROGRESS">In Progress</option><option value="COMPLETED">Completed</option>
-                </select>
-              </div>
-              <div className="flex justify-end space-x-3 mt-6">
-                <button type="button" onClick={() => setShowModal(false)} className="px-4 py-2 rounded-2xl bg-surfaceAlt hover:bg-border">Cancel</button>
-                <button type="submit" className="px-4 py-2 rounded-2xl bg-plum text-white hover:bg-plumDark">Save</button>
-              </div>
-            </form>
+            <h2 className="text-2xl font-bold text-plum mb-4">{editingRecord ? 'Edit Project' : 'Add Project'}</h2>
+            <ProjectForm 
+              initialValues={editingRecord} 
+              onSubmit={handleSave} 
+              onCancel={() => { setShowModal(false); setEditingRecord(null); }} 
+            />
           </div>
         </div>
       )}
@@ -252,11 +325,56 @@ export default function Projects() {
                 <p className="text-inkMuted text-sm whitespace-pre-wrap">{viewStarProj.starForm.result}</p>
               </div>
             </div>
-            <div className="flex justify-end mt-6">
+            
+            {aiScore && (
+              <div className="mt-6 p-5 bg-plum/5 rounded-2xl border border-plum/20">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="font-bold text-plum text-lg">AI Evaluation</h3>
+                  <span className="px-3 py-1 bg-white text-plum rounded-full font-bold shadow-sm border border-plum/20">Score: {aiScore.score}</span>
+                </div>
+                <ul className="list-disc pl-5 space-y-2 text-sm text-inkMuted">
+                  {aiScore.feedback?.map((fb, idx) => (
+                    <li key={idx}>{fb}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            
+            <div className="flex justify-between items-center mt-6">
+              <button 
+                onClick={handleScoreStar}
+                disabled={aiLoading}
+                className={`flex items-center px-4 py-2 rounded-2xl transition-colors ${
+                  aiLoading ? 'bg-surfaceAlt text-inkMuted' : 'bg-plum/10 text-plum hover:bg-plum/20'
+                }`}
+              >
+                <FiCpu className="mr-2" /> {aiLoading ? 'Scoring...' : 'Score this STAR'}
+              </button>
               <button onClick={() => setViewStarProj(null)} className="px-4 py-2 bg-plum text-white rounded-2xl hover:bg-plumDark">Close</button>
             </div>
           </div>
         </div>
+      )}
+
+      {viewDetail && (
+        <DetailModal
+          title={`Project: ${viewDetail.title}`}
+          fields={[
+            { label: 'Domain', value: viewDetail.domain },
+            { label: 'Technology', value: viewDetail.techStack?.join(', ') },
+            { label: 'Status', value: viewDetail.status },
+            { label: 'Repository Link', value: viewDetail.repoLink },
+          ]}
+          actions={
+            <button 
+              onClick={() => { setEditingRecord(viewDetail); setShowModal(true); setViewDetail(null); }} 
+              className="px-4 py-2 bg-plum text-white rounded-2xl hover:bg-plumDark"
+            >
+              Edit
+            </button>
+          }
+          onClose={() => setViewDetail(null)}
+        />
       )}
     </div>
   );

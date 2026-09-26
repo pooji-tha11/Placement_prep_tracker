@@ -60,4 +60,9 @@ public class ApplicationTracker {
     public Set<String> getAllRequiredSkills() {
         return service.getAllRequiredSkills();
     }
+
+    public JobApplication updateApplication(String id, String company, String role, java.time.LocalDate dateApplied, String jobLink, String jobDescription, java.util.List<String> requiredSkills, String notes, String resumeId) {
+        return service.updateApplication(id, company, role, dateApplied, jobLink, jobDescription, requiredSkills, notes, resumeId);
+    }
+
 }

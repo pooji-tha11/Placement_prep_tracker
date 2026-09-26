@@ -60,4 +60,18 @@ public class AchievementController {
     public record HackathonRequest(String name, String organizer, LocalDate date, String result) {}
     public record CertificationRequest(String name, String issuingOrg, LocalDate date) {}
     public record AwardRequest(String competitionName, String rank, LocalDate date) {}
+
+    @PutMapping("/hackathon/{id}")
+    public AchievementEntry updateHackathon(@PathVariable String id, @RequestBody HackathonRequest req) {
+        return tracker.updateAchievement(id, new Hackathon(req.name(), req.organizer(), req.date(), req.result()));
+    }
+    @PutMapping("/certification/{id}")
+    public AchievementEntry updateCertification(@PathVariable String id, @RequestBody CertificationRequest req) {
+        return tracker.updateAchievement(id, new Certification(req.name(), req.issuingOrg(), req.date()));
+    }
+    @PutMapping("/award/{id}")
+    public AchievementEntry updateAward(@PathVariable String id, @RequestBody AwardRequest req) {
+        return tracker.updateAchievement(id, new CompetitionAward(req.competitionName(), req.rank(), req.date()));
+    }
+
 }

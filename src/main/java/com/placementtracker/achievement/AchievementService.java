@@ -63,4 +63,13 @@ public class AchievementService {
     public boolean deleteAchievement(String id) {
         return repository.deleteById(id);
     }
+
+    public AchievementEntry updateAchievement(String id, Achievement a) {
+        AchievementEntry existing = repository.findById(id);
+        if (existing == null) throw new IllegalArgumentException("Achievement not found");
+        AchievementEntry updated = new AchievementEntry(id, a, existing.getCreatedAt());
+        repository.update(updated);
+        return updated;
+    }
+
 }

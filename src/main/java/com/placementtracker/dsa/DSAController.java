@@ -55,4 +55,10 @@ public class DSAController {
 
     public record CreateProblemRequest(String platform, String dsaTag, Difficulty difficulty,
                                         int confidenceLevel, LocalDate solvedDate) {}
+
+    @PutMapping("/{id}")
+    public Problem update(@PathVariable String id, @RequestBody CreateProblemRequest req) {
+        return tracker.updateProblem(id, req.platform(), req.dsaTag(), req.difficulty(), req.confidenceLevel(), req.solvedDate());
+    }
+
 }

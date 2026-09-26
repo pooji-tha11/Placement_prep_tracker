@@ -111,4 +111,19 @@ public class GoalRepository {
                 rs.getDate("deadline").toLocalDate()
         );
     }
+
+    public boolean update(Goal<?> g) {
+        String sql = "UPDATE goals SET description = ?, target_count = ?, deadline = ? WHERE id = ?";
+        try (java.sql.Connection conn = com.placementtracker.database.DatabaseConnection.getConnection();
+             java.sql.PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, g.getDescription());
+            stmt.setInt(2, g.getTargetCount());
+            stmt.setDate(3, java.sql.Date.valueOf(g.getDeadline()));
+            stmt.setString(4, g.getId());
+            return stmt.executeUpdate() > 0;
+        } catch (java.sql.SQLException e) {
+            throw new RuntimeException("Failed to update goal: " + e.getMessage(), e);
+        }
+    }
+
 }

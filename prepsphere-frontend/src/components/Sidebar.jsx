@@ -12,7 +12,6 @@ const navItems = [
   { path: "/projects", label: "Projects", icon: FiFolder },
   { path: "/resumes", label: "Resumes", icon: FiFileText },
   { path: "/applications", label: "Applications", icon: FiBriefcase },
-  { path: "/study", label: "Study Streaks", icon: FiCalendar },
   { path: "/achievements", label: "Achievements", icon: FiAward },
   { path: "/goals", label: "Goals", icon: FiTarget },
   { path: "/focus", label: "Focus Timer", icon: FiClock },

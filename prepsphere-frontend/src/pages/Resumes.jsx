@@ -1,32 +1,46 @@
 import { useState } from 'react';
 import { useApi } from '../hooks/useApi';
-import { FiTrash2, FiPlus, FiFileText } from 'react-icons/fi';
+import { FiTrash2, FiPlus, FiFileText, FiMaximize2 } from 'react-icons/fi';
+import DetailModal from '../components/DetailModal';
+import ResumeForm from '../components/ResumeForm';
 
 export default function Resumes() {
-  const { data: resumes, loading, error, postData, deleteData } = useApi('/resumes');
+  const { data: resumes, loading, error, postData, putData, deleteData } = useApi('/resumes');
   const [filter, setFilter] = useState('');
   const [showModal, setShowModal] = useState(false);
-  const [formData, setFormData] = useState({ label: '', version: '', filename: '', dateAdded: '' });
+  const [editingRecord, setEditingRecord] = useState(null);
+  const [viewDetail, setViewDetail] = useState(null);
+  const [isUploading, setIsUploading] = useState(false);
 
   const filteredResumes = resumes?.filter(r => 
     r.label.toLowerCase().includes(filter.toLowerCase()) || 
     r.version.toLowerCase().includes(filter.toLowerCase())
   );
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const handleSave = async (data) => {
+    setIsUploading(true);
     try {
-      await postData('/resumes', formData);
+      if (editingRecord) {
+        await putData(`/resumes/${editingRecord.id}`, data);
+      } else {
+        await postData('/resumes', data);
+      }
       setShowModal(false);
-      setFormData({ label: '', version: '', filename: '', dateAdded: '' });
+      setEditingRecord(null);
     } catch (err) {
       alert(err.message);
+    } finally {
+      setIsUploading(false);
     }
   };
 
   const handleDelete = async (id) => {
     if (window.confirm("Are you sure you want to delete this resume?")) {
-      await deleteData(`/resumes/${id}`);
+      try {
+        await deleteData(`/resumes/${id}`);
+      } catch (err) {
+        alert(err.message);
+      }
     }
   };
 
@@ -35,7 +49,7 @@ export default function Resumes() {
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-bold text-plum">Resumes</h1>
         <button 
-          onClick={() => setShowModal(true)}
+          onClick={() => { setEditingRecord(null); setShowModal(true); }}
           className="bg-plum hover:bg-plumDark text-white px-4 py-2 rounded-2xl flex items-center shadow-sm transition-colors"
         >
           <FiPlus className="mr-2" /> Add Resume
@@ -71,13 +85,17 @@ export default function Resumes() {
                     <p className="text-xs text-inkMuted mt-1">Added: {resume.dateAdded}</p>
                   </div>
                 </div>
-                <button 
-                  onClick={() => handleDelete(resume.id)}
-                  className="p-2 text-danger opacity-0 lg:group-hover:opacity-100 transition-opacity bg-white hover:bg-danger hover:text-white rounded-full"
-                  title="Delete"
-                >
-                  <FiTrash2 size={18} />
-                </button>
+                <div className="flex space-x-2">
+                  <button onClick={() => window.open(`http://localhost:8080/api/resumes/${resume.id}/file`, '_blank')} className="p-2 text-inkMuted opacity-0 lg:group-hover:opacity-100 transition-opacity bg-white hover:bg-surface hover:text-ink rounded-full" title="Download"><FiFileText size={18} /></button>
+                  <button onClick={() => setViewDetail(resume)} className="p-2 text-inkMuted opacity-0 lg:group-hover:opacity-100 transition-opacity bg-white hover:bg-surface hover:text-ink rounded-full" title="View Details"><FiMaximize2 size={18} /></button>
+                  <button 
+                    onClick={() => handleDelete(resume.id)}
+                    className="p-2 text-danger opacity-0 lg:group-hover:opacity-100 transition-opacity bg-white hover:bg-danger hover:text-white rounded-full"
+                    title="Delete"
+                  >
+                    <FiTrash2 size={18} />
+                  </button>
+                </div>
               </div>
             ))}
           </div>
@@ -87,31 +105,36 @@ export default function Resumes() {
       {showModal && (
         <div className="fixed inset-0 bg-ink/20 flex items-center justify-center z-50 p-4">
           <div className="bg-surface p-6 rounded-3xl shadow-lg border border-border w-full max-w-md">
-            <h2 className="text-2xl font-bold text-plum mb-4">Add Resume</h2>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-ink mb-1">Label</label>
-                <input required type="text" className="w-full p-2 rounded-2xl bg-surfaceAlt border border-border" value={formData.label} onChange={e => setFormData({...formData, label: e.target.value})} />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-ink mb-1">Version</label>
-                <input required type="text" className="w-full p-2 rounded-2xl bg-surfaceAlt border border-border" value={formData.version} onChange={e => setFormData({...formData, version: e.target.value})} />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-ink mb-1">Filename</label>
-                <input required type="text" className="w-full p-2 rounded-2xl bg-surfaceAlt border border-border" value={formData.filename} onChange={e => setFormData({...formData, filename: e.target.value})} />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-ink mb-1">Date Added</label>
-                <input required type="date" className="w-full p-2 rounded-2xl bg-surfaceAlt border border-border" value={formData.dateAdded} onChange={e => setFormData({...formData, dateAdded: e.target.value})} />
-              </div>
-              <div className="flex justify-end space-x-3 mt-6">
-                <button type="button" onClick={() => setShowModal(false)} className="px-4 py-2 rounded-2xl bg-surfaceAlt text-ink hover:bg-border">Cancel</button>
-                <button type="submit" className="px-4 py-2 rounded-2xl bg-plum text-white hover:bg-plumDark">Save</button>
-              </div>
-            </form>
+            <h2 className="text-2xl font-bold text-plum mb-4">{editingRecord ? 'Edit Resume' : 'Add Resume'}</h2>
+            {isUploading && <div className="mb-4 p-3 bg-clay/20 text-clay rounded-xl text-center">Uploading file, please wait...</div>}
+            <ResumeForm 
+              initialValues={editingRecord} 
+              onSubmit={handleSave} 
+              onCancel={() => { setShowModal(false); setEditingRecord(null); }} 
+            />
           </div>
         </div>
+      )}
+
+      {viewDetail && (
+        <DetailModal
+          title={`Resume: ${viewDetail.label}`}
+          fields={[
+            { label: 'Label', value: viewDetail.label },
+            { label: 'Version', value: viewDetail.version },
+            { label: 'Filename', value: viewDetail.filename },
+            { label: 'Date Added', value: viewDetail.dateAdded },
+          ]}
+          actions={
+            <button 
+              onClick={() => { setEditingRecord(viewDetail); setShowModal(true); setViewDetail(null); }} 
+              className="px-4 py-2 bg-plum text-white rounded-2xl hover:bg-plumDark"
+            >
+              Edit
+            </button>
+          }
+          onClose={() => setViewDetail(null)}
+        />
       )}
     </div>
   );

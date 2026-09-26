@@ -155,4 +155,21 @@ public class ProjectRepository {
                 starForm
         );
     }
+
+    public boolean update(Project p) {
+        String sql = "UPDATE projects SET title = ?, domain = ?, tech_stack = ?, repo_link = ?, status = ? WHERE id = ?";
+        try (java.sql.Connection conn = com.placementtracker.database.DatabaseConnection.getConnection();
+             java.sql.PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, p.getTitle());
+            stmt.setString(2, p.getDomain());
+            stmt.setString(3, String.join(",", p.getTechStack()));
+            stmt.setString(4, p.getRepoLink());
+            stmt.setString(5, p.getStatus().toString());
+            stmt.setString(6, p.getId());
+            return stmt.executeUpdate() > 0;
+        } catch (java.sql.SQLException e) {
+            throw new RuntimeException("Failed to update project: " + e.getMessage(), e);
+        }
+    }
+
 }

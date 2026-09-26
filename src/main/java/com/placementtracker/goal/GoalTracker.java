@@ -23,4 +23,9 @@ public class GoalTracker {
     public boolean removeGoal(String id) {
         return service.deleteGoal(id);
     }
+
+    public Goal<?> updateGoal(String id, String description, int targetCount, java.time.LocalDate deadline) {
+        return service.updateGoal(id, description, targetCount, deadline);
+    }
+
 }

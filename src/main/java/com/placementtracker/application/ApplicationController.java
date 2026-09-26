@@ -71,4 +71,10 @@ public class ApplicationController {
                                             ApplicationStatus status, String jobLink, String jobDescription,
                                             List<String> requiredSkills, String notes, String resumeId) {}
     public record UpdateStatusRequest(ApplicationStatus status) {}
+
+    @PutMapping("/{id}")
+    public JobApplication update(@PathVariable String id, @RequestBody CreateApplicationRequest req) {
+        return tracker.updateApplication(id, req.company(), req.role(), req.dateApplied(), req.jobLink(), req.jobDescription(), req.requiredSkills(), req.notes(), req.resumeId());
+    }
+
 }

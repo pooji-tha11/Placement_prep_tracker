@@ -41,4 +41,13 @@ public class GoalService {
     public boolean deleteGoal(String id) {
         return repository.deleteById(id);
     }
+
+    public Goal<?> updateGoal(String id, String description, int targetCount, java.time.LocalDate deadline) {
+        Goal<?> g = repository.findById(id);
+        if (g == null) throw new IllegalArgumentException("Goal not found");
+        Goal<?> updated = new Goal<>(id, description, targetCount, g.getCurrentCount(), deadline);
+        repository.update(updated);
+        return updated;
+    }
+
 }

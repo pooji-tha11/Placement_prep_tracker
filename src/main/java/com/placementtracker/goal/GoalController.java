@@ -37,4 +37,10 @@ public class GoalController {
 
     public record CreateGoalRequest(String description, int targetCount, LocalDate deadline) {}
     public record UpdateProgressRequest(int currentCount) {}
+
+    @PutMapping("/{id}")
+    public Goal<?> update(@PathVariable String id, @RequestBody CreateGoalRequest req) {
+        return tracker.updateGoal(id, req.description(), req.targetCount(), req.deadline());
+    }
+
 }

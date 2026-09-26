@@ -13,8 +13,7 @@ import com.placementtracker.project.ProjectTracker;
 import com.placementtracker.reports.ReportMenu;
 import com.placementtracker.resume.ResumeMenu;
 import com.placementtracker.resume.ResumeTracker;
-import com.placementtracker.study.StudyMenu;
-import com.placementtracker.study.StudyTracker;
+
 import com.placementtracker.timer.FocusMenu;
 
 import java.util.Scanner;
@@ -26,7 +25,7 @@ public class MenuRouter {
     private final DSATracker dsaTracker = new DSATracker();
     private final ProjectTracker projectTracker = new ProjectTracker();
     private final ApplicationTracker applicationTracker = new ApplicationTracker(resumeTracker);
-    private final StudyTracker studyTracker = new StudyTracker();
+
     private final AchievementTracker achievementTracker = new AchievementTracker();
 
 
@@ -41,7 +40,7 @@ public class MenuRouter {
             System.out.println("2. Project Tracker");
             System.out.println("3. Resume Manager");
             System.out.println("4. Job & Internship Applications");
-            System.out.println("5. Study Streak Tracker");
+
             System.out.println("6. Hackathon & Certification Tracker");
             System.out.println("7. Goal Setting");
             System.out.println("8. Focus Session Timer");
@@ -55,7 +54,7 @@ public class MenuRouter {
                 case 2 -> routeToProject();
                 case 3 -> routeToResume();
                 case 4 -> routeToApplication();
-                case 5 -> routeToStudy();
+
                 case 6 -> routeToAchievement();
                 case 7 -> routeToGoal();
                 case 8 -> routeToFocus();
@@ -84,9 +83,7 @@ public class MenuRouter {
         new ApplicationMenu(scanner, applicationTracker).show();
     }
 
-    private void routeToStudy() {
-        new StudyMenu(scanner, studyTracker).show();
-    }
+
 
    private void routeToAchievement() {
     new AchievementMenu(scanner, achievementTracker).show();
@@ -100,6 +97,6 @@ public class MenuRouter {
     }
 
     private void routeToReports() {
-    new ReportMenu(scanner, dsaTracker, projectTracker, applicationTracker, studyTracker, achievementTracker).show();
+    new ReportMenu(scanner, dsaTracker, projectTracker, applicationTracker, achievementTracker).show();
 }
 }

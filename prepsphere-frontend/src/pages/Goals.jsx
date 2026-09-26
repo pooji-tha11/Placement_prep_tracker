@@ -1,19 +1,25 @@
 import { useState } from 'react';
 import { useApi } from '../hooks/useApi';
-import { FiTrash2, FiPlus, FiTarget, FiCheck } from 'react-icons/fi';
+import { FiTrash2, FiPlus, FiTarget, FiCheck, FiMaximize2 } from 'react-icons/fi';
 import { api } from '../api/client';
+import DetailModal from '../components/DetailModal';
+import GoalForm from '../components/GoalForm';
 
 export default function Goals() {
-  const { data: goals, loading, error, postData, deleteData, fetchData } = useApi('/goals');
+  const { data: goals, loading, error, postData, putData, deleteData, fetchData } = useApi('/goals');
   const [showModal, setShowModal] = useState(false);
-  const [formData, setFormData] = useState({ description: '', targetCount: '', deadline: '' });
+  const [editingRecord, setEditingRecord] = useState(null);
+  const [viewDetail, setViewDetail] = useState(null);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const handleSave = async (data) => {
     try {
-      await postData('/goals', { ...formData, targetCount: parseInt(formData.targetCount, 10) });
+      if (editingRecord) {
+        await putData(`/goals/${editingRecord.id}`, data);
+      } else {
+        await postData('/goals', data);
+      }
       setShowModal(false);
-      setFormData({ description: '', targetCount: '', deadline: '' });
+      setEditingRecord(null);
     } catch (err) {
       alert(err.message);
     }
@@ -32,7 +38,7 @@ export default function Goals() {
     <div className="max-w-5xl mx-auto space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-bold text-plum">Goals</h1>
-        <button onClick={() => setShowModal(true)} className="bg-plum hover:bg-plumDark text-white px-4 py-2 rounded-2xl flex items-center shadow-sm">
+        <button onClick={() => { setEditingRecord(null); setShowModal(true); }} className="bg-plum hover:bg-plumDark text-white px-4 py-2 rounded-2xl flex items-center shadow-sm">
           <FiPlus className="mr-2" /> Add Goal
         </button>
       </div>
@@ -42,7 +48,10 @@ export default function Goals() {
           <div className="col-span-full text-center text-inkMuted py-8">No goals set yet.</div>
         ) : goals?.map(goal => (
           <div key={goal.id} className="p-6 rounded-3xl bg-surface border border-border shadow-sm flex flex-col space-y-4 relative group">
-            <button onClick={() => window.confirm("Delete goal?") && deleteData(`/goals/${goal.id}`)} className="absolute top-4 right-4 p-2 text-danger opacity-0 lg:group-hover:opacity-100 bg-surfaceAlt rounded-full hover:bg-danger hover:text-white transition-all"><FiTrash2 /></button>
+            <div className="absolute top-4 right-4 flex space-x-2">
+              <button onClick={() => setViewDetail(goal)} className="p-2 text-inkMuted opacity-0 lg:group-hover:opacity-100 bg-surfaceAlt rounded-full hover:bg-white hover:text-ink transition-all"><FiMaximize2 /></button>
+              <button onClick={() => window.confirm("Delete goal?") && deleteData(`/goals/${goal.id}`)} className="p-2 text-danger opacity-0 lg:group-hover:opacity-100 bg-surfaceAlt rounded-full hover:bg-danger hover:text-white transition-all"><FiTrash2 /></button>
+            </div>
             <div className="flex items-start space-x-3 pr-8">
               <div className="p-2 bg-clay/20 text-clay rounded-xl"><FiTarget /></div>
               <div>
@@ -88,18 +97,35 @@ export default function Goals() {
       {showModal && (
         <div className="fixed inset-0 bg-ink/20 flex items-center justify-center z-50 p-4">
           <div className="bg-surface p-6 rounded-3xl shadow-lg border border-border w-full max-w-md">
-            <h2 className="text-2xl font-bold text-plum mb-4">Add Goal</h2>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div><label className="block text-sm mb-1">Description</label><input required type="text" className="w-full p-2 rounded-2xl bg-surfaceAlt border" value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} /></div>
-              <div><label className="block text-sm mb-1">Target Count</label><input required type="number" min="1" className="w-full p-2 rounded-2xl bg-surfaceAlt border" value={formData.targetCount} onChange={e => setFormData({...formData, targetCount: e.target.value})} /></div>
-              <div><label className="block text-sm mb-1">Deadline</label><input required type="date" className="w-full p-2 rounded-2xl bg-surfaceAlt border" value={formData.deadline} onChange={e => setFormData({...formData, deadline: e.target.value})} /></div>
-              <div className="flex justify-end space-x-3 mt-6">
-                <button type="button" onClick={() => setShowModal(false)} className="px-4 py-2 rounded-2xl bg-surfaceAlt hover:bg-border">Cancel</button>
-                <button type="submit" className="px-4 py-2 rounded-2xl bg-plum text-white hover:bg-plumDark">Save</button>
-              </div>
-            </form>
+            <h2 className="text-2xl font-bold text-plum mb-4">{editingRecord ? 'Edit Goal' : 'Add Goal'}</h2>
+            <GoalForm 
+              initialValues={editingRecord} 
+              onSubmit={handleSave} 
+              onCancel={() => { setShowModal(false); setEditingRecord(null); }} 
+            />
           </div>
         </div>
+      )}
+
+      {viewDetail && (
+        <DetailModal
+          title="Goal Details"
+          fields={[
+            { label: 'Description', value: viewDetail.description },
+            { label: 'Target Date', value: viewDetail.deadline },
+            { label: 'Progress', value: `${viewDetail.currentCount} / ${viewDetail.targetCount} (${Math.round(viewDetail.progressPercentage)}%)` },
+            { label: 'Status', value: viewDetail.achieved ? 'Achieved' : 'In Progress' }
+          ]}
+          actions={
+            <button 
+              onClick={() => { setEditingRecord(viewDetail); setShowModal(true); setViewDetail(null); }} 
+              className="px-4 py-2 bg-plum text-white rounded-2xl hover:bg-plumDark"
+            >
+              Edit
+            </button>
+          }
+          onClose={() => setViewDetail(null)}
+        />
       )}
     </div>
   );

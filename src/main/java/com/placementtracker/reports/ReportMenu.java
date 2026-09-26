@@ -7,7 +7,7 @@ import com.placementtracker.dsa.DSATracker;
 import com.placementtracker.dsa.Difficulty;
 import com.placementtracker.project.ProjectStatus;
 import com.placementtracker.project.ProjectTracker;
-import com.placementtracker.study.StudyTracker;
+
 import com.placementtracker.achievement.AchievementTracker;
 
 import java.util.List;
@@ -22,12 +22,12 @@ public class ReportMenu {
     private final ReadinessTracker readinessTracker;
 
     public ReportMenu(Scanner scanner, DSATracker dsaTracker, ProjectTracker projectTracker,
-                       ApplicationTracker applicationTracker, StudyTracker studyTracker,
+                       ApplicationTracker applicationTracker,
                        AchievementTracker achievementTracker) {
         this.scanner = scanner;
-        this.tracker = new ReportTracker(dsaTracker, projectTracker, applicationTracker, studyTracker);
+        this.tracker = new ReportTracker(dsaTracker, projectTracker, applicationTracker);
         this.readinessTracker = new ReadinessTracker(
-                dsaTracker, projectTracker, studyTracker, achievementTracker, applicationTracker
+                dsaTracker, projectTracker, achievementTracker, applicationTracker
         );
     }
 
@@ -41,7 +41,7 @@ public class ReportMenu {
             System.out.println("1. DSA Analytics");
             System.out.println("2. Project Analytics");
             System.out.println("3. Application Analytics");
-            System.out.println("4. Study Analytics");
+
             System.out.println("5. Placement Readiness Score");
             System.out.println("0. Back to Main Menu");
 
@@ -51,7 +51,7 @@ public class ReportMenu {
                 case 1 -> showDsaAnalytics();
                 case 2 -> showProjectAnalytics();
                 case 3 -> showApplicationAnalytics();
-                case 4 -> showStudyAnalytics();
+
                 case 5 -> showReadinessScore();
                 case 0 -> back = true;
             }
@@ -114,14 +114,7 @@ public class ReportMenu {
         System.out.printf("%nInterview Conversion Rate: %.1f%%%n", tracker.interviewConversionRate());
     }
 
-    private void showStudyAnalytics() {
-        ConsoleUtil.printDivider();
-        System.out.println("Study Analytics");
-        ConsoleUtil.printDivider();
-        System.out.println("Weekly Study Time: " + tracker.weeklyStudyMinutes() + " minutes");
-        System.out.println("Current Streak: " + tracker.currentStreak() + " day(s)");
-        System.out.println("Longest Streak: " + tracker.longestStreak() + " day(s)");
-    }
+
 
     private void printBar(String label, long count, long maxCount) {
         int barLength = maxCount == 0 ? 0 : (int) ((count * 20.0) / maxCount);

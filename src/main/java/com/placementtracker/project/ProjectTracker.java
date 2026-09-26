@@ -36,4 +36,9 @@ public class ProjectTracker {
         public List<Project> advancedSearch(String domain, String technology) {
         return service.advancedSearch(domain, technology);
     }
+
+    public Project updateProject(String id, String title, String domain, java.util.List<String> techStack, String repoLink, ProjectStatus status) {
+        return service.updateProject(id, title, domain, techStack, repoLink, status);
+    }
+
 }

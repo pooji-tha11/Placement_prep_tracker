@@ -6,7 +6,7 @@ import com.placementtracker.dsa.DSATracker;
 import com.placementtracker.dsa.Difficulty;
 import com.placementtracker.project.ProjectStatus;
 import com.placementtracker.project.ProjectTracker;
-import com.placementtracker.study.StudyTracker;
+
 
 import java.util.List;
 import java.util.Map;
@@ -17,8 +17,8 @@ public class ReportTracker {
     private final AnalyticsService service;
 
     public ReportTracker(DSATracker dsaTracker, ProjectTracker projectTracker,
-                          ApplicationTracker applicationTracker, StudyTracker studyTracker) {
-        this.service = new AnalyticsService(dsaTracker, projectTracker, applicationTracker, studyTracker);
+                          ApplicationTracker applicationTracker) {
+        this.service = new AnalyticsService(dsaTracker, projectTracker, applicationTracker);
     }
 
     public Map<Difficulty, Long> difficultyDistribution() {
@@ -49,15 +49,5 @@ public class ReportTracker {
         return service.getInterviewConversionRate();
     }
 
-    public int weeklyStudyMinutes() {
-        return service.getWeeklyStudyMinutes();
-    }
 
-    public int currentStreak() {
-        return service.getCurrentStreak();
-    }
-
-    public int longestStreak() {
-        return service.getLongestStreak();
-    }
 }

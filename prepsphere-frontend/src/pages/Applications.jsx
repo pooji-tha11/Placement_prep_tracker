@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useApi } from '../hooks/useApi';
-import { FiTrash2, FiPlus, FiBriefcase, FiSearch, FiChevronDown, FiChevronUp } from 'react-icons/fi';
+import { FiTrash2, FiPlus, FiBriefcase, FiSearch, FiChevronDown, FiChevronUp, FiExternalLink, FiMaximize2 } from 'react-icons/fi';
 import { api } from '../api/client';
+import DetailModal from '../components/DetailModal';
+import ApplicationForm from '../components/ApplicationForm';
 
 export default function Applications() {
-  const { data: applications, loading, deleteData, fetchData, postData } = useApi('/applications');
+  const { data: applications, loading, deleteData, fetchData, postData, putData } = useApi('/applications');
   const [resumes, setResumes] = useState([]);
   const [skillsList, setSkillsList] = useState([]);
   
@@ -12,7 +14,8 @@ export default function Applications() {
   const [showSearch, setShowSearch] = useState(false);
   const [searchParams, setSearchParams] = useState({ company: '', status: '', skill: '' });
   
-  const [formData, setFormData] = useState({ company: '', role: '', dateApplied: '', status: 'APPLIED', requiredSkills: '', resumeId: '' });
+  const [editingRecord, setEditingRecord] = useState(null);
+  const [viewDetail, setViewDetail] = useState(null);
 
   useEffect(() => {
     api.get('/resumes').then(setResumes).catch(console.error);
@@ -33,15 +36,15 @@ export default function Applications() {
     fetchData('/applications');
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const handleSave = async (data) => {
     try {
-      await postData('/applications', { 
-        ...formData, 
-        requiredSkills: formData.requiredSkills.split(',').map(s=>s.trim()).filter(Boolean) 
-      });
+      if (editingRecord) {
+        await putData(`/applications/${editingRecord.id}`, data);
+      } else {
+        await postData('/applications', data);
+      }
       setShowModal(false);
-      setFormData({ company: '', role: '', dateApplied: '', status: 'APPLIED', requiredSkills: '', resumeId: '' });
+      setEditingRecord(null);
       api.get('/applications/skills').then(setSkillsList).catch(console.error);
     } catch (err) {
       alert(err.message);
@@ -61,7 +64,7 @@ export default function Applications() {
     <div className="max-w-5xl mx-auto space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-bold text-plum">Applications</h1>
-        <button onClick={() => setShowModal(true)} className="bg-plum hover:bg-plumDark text-white px-4 py-2 rounded-2xl flex items-center shadow-sm">
+        <button onClick={() => { setEditingRecord(null); setShowModal(true); }} className="bg-plum hover:bg-plumDark text-white px-4 py-2 rounded-2xl flex items-center shadow-sm">
           <FiPlus className="mr-2" /> Add Application
         </button>
       </div>
@@ -109,11 +112,21 @@ export default function Applications() {
                     <div className="flex items-center space-x-3">
                       <div className="p-3 bg-surface text-clay rounded-xl"><FiBriefcase size={20} /></div>
                       <div>
-                        <h3 className="font-semibold text-lg leading-tight">{app.company}</h3>
+                        <h3 className="font-semibold text-lg leading-tight flex items-center">
+                          {app.company}
+                          {app.jobLink && (
+                            <a href={app.jobLink} target="_blank" rel="noopener noreferrer" className="ml-2 text-inkMuted hover:text-plum transition-colors" title="View Job Description">
+                              <FiExternalLink size={16} />
+                            </a>
+                          )}
+                        </h3>
                         <p className="text-sm text-plum font-medium">{app.role}</p>
                       </div>
                     </div>
-                    <button onClick={() => window.confirm("Delete?") && deleteData(`/applications/${app.id}`)} className="p-2 text-danger opacity-0 lg:group-hover:opacity-100 bg-white rounded-full hover:bg-danger hover:text-white transition-all"><FiTrash2 size={16} /></button>
+                    <div className="flex space-x-2">
+                      <button onClick={() => setViewDetail(app)} className="p-2 text-inkMuted opacity-0 lg:group-hover:opacity-100 bg-white rounded-full hover:bg-surface hover:text-ink transition-all"><FiMaximize2 size={16} /></button>
+                      <button onClick={() => window.confirm("Delete?") && deleteData(`/applications/${app.id}`)} className="p-2 text-danger opacity-0 lg:group-hover:opacity-100 bg-white rounded-full hover:bg-danger hover:text-white transition-all"><FiTrash2 size={16} /></button>
+                    </div>
                   </div>
                   <p className="text-xs text-inkMuted mb-3">Applied: {app.dateApplied}</p>
                 </div>
@@ -146,26 +159,41 @@ export default function Applications() {
       {showModal && (
         <div className="fixed inset-0 bg-ink/20 flex items-center justify-center z-50 p-4">
           <div className="bg-surface p-6 rounded-3xl shadow-lg border border-border w-full max-w-md max-h-[90vh] overflow-y-auto">
-            <h2 className="text-2xl font-bold text-plum mb-4">Add Application</h2>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div><label className="block text-sm mb-1">Company</label><input required type="text" className="w-full p-2 rounded-2xl bg-surfaceAlt border" value={formData.company} onChange={e => setFormData({...formData, company: e.target.value})} /></div>
-              <div><label className="block text-sm mb-1">Role</label><input required type="text" className="w-full p-2 rounded-2xl bg-surfaceAlt border" value={formData.role} onChange={e => setFormData({...formData, role: e.target.value})} /></div>
-              <div><label className="block text-sm mb-1">Date Applied</label><input required type="date" className="w-full p-2 rounded-2xl bg-surfaceAlt border" value={formData.dateApplied} onChange={e => setFormData({...formData, dateApplied: e.target.value})} /></div>
-              <div><label className="block text-sm mb-1">Required Skills (comma separated)</label><input type="text" className="w-full p-2 rounded-2xl bg-surfaceAlt border" value={formData.requiredSkills} onChange={e => setFormData({...formData, requiredSkills: e.target.value})} /></div>
-              <div>
-                <label className="block text-sm mb-1">Resume Used</label>
-                <select required className="w-full p-2 rounded-2xl bg-surfaceAlt border" value={formData.resumeId} onChange={e => setFormData({...formData, resumeId: e.target.value})}>
-                  <option value="">Select a resume...</option>
-                  {resumes.map(r => <option key={r.id} value={r.id}>{r.label} ({r.version})</option>)}
-                </select>
-              </div>
-              <div className="flex justify-end space-x-3 mt-6">
-                <button type="button" onClick={() => setShowModal(false)} className="px-4 py-2 rounded-2xl bg-surfaceAlt hover:bg-border">Cancel</button>
-                <button type="submit" className="px-4 py-2 rounded-2xl bg-plum text-white hover:bg-plumDark">Save</button>
-              </div>
-            </form>
+            <h2 className="text-2xl font-bold text-plum mb-4">{editingRecord ? 'Edit Application' : 'Add Application'}</h2>
+            <ApplicationForm 
+              initialValues={editingRecord} 
+              resumes={resumes}
+              onSubmit={handleSave} 
+              onCancel={() => { setShowModal(false); setEditingRecord(null); }} 
+            />
           </div>
         </div>
+      )}
+
+      {viewDetail && (
+        <DetailModal
+          title={`Application: ${viewDetail.company} - ${viewDetail.role}`}
+          fields={[
+            { label: 'Company', value: viewDetail.company },
+            { label: 'Role', value: viewDetail.role },
+            { label: 'Status', value: viewDetail.status },
+            { label: 'Date Applied', value: viewDetail.dateApplied },
+            { label: 'Required Skills', value: viewDetail.requiredSkills?.join(', ') },
+            { label: 'Job Link', value: viewDetail.jobLink },
+            { label: 'Job Description', value: viewDetail.jobDescription },
+            { label: 'Notes', value: viewDetail.notes },
+            { label: 'Resume Used', value: resumes.find(r => r.id === viewDetail.resumeId)?.label }
+          ]}
+          actions={
+            <button 
+              onClick={() => { setEditingRecord(viewDetail); setShowModal(true); setViewDetail(null); }} 
+              className="px-4 py-2 bg-plum text-white rounded-2xl hover:bg-plumDark"
+            >
+              Edit
+            </button>
+          }
+          onClose={() => setViewDetail(null)}
+        />
       )}
     </div>
   );

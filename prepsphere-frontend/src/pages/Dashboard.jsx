@@ -1,12 +1,14 @@
 import { useEffect, useState } from 'react';
 import { api } from '../api/client';
-import { FiCode, FiBriefcase, FiCalendar } from 'react-icons/fi';
+import { FiCode, FiBriefcase, FiClock, FiFolder } from 'react-icons/fi';
 
 export default function Dashboard() {
   const [readiness, setReadiness] = useState(null);
   const [dsa, setDsa] = useState(null);
   const [apps, setApps] = useState(null);
-  const [study, setStudy] = useState(null);
+
+  const [proj, setProj] = useState(null);
+  const [sessions, setSessions] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -14,12 +16,14 @@ export default function Dashboard() {
       api.get('/reports/readiness').catch(() => null),
       api.get('/reports/dsa/difficulty').catch(() => null),
       api.get('/reports/applications/status').catch(() => null),
-      api.get('/reports/study/summary').catch(() => null)
-    ]).then(([r, d, a, s]) => {
+      api.get('/focus-sessions').catch(() => []),
+      api.get('/reports/projects/status').catch(() => null)
+    ]).then(([r, d, a, f, p]) => {
       setReadiness(r);
       setDsa(d);
       setApps(a);
-      setStudy(s);
+      setSessions(f || []);
+      setProj(p);
     }).finally(() => setLoading(false));
   }, []);
 
@@ -27,7 +31,9 @@ export default function Dashboard() {
 
   const totalDsa = dsa ? Object.values(dsa).reduce((a, b) => a + b, 0) : 0;
   const totalApps = apps ? Object.values(apps).reduce((a, b) => a + b, 0) : 0;
-  const streak = study?.currentStreak || 0;
+  const completedProjects = proj?.COMPLETED || 0;
+  const longestSession = sessions.length > 0 ? Math.max(...sessions.map(s => s.durationMinutes)) : 0;
+
   const overall = readiness?.overall || 0;
   const breakdown = readiness?.breakdown || {};
 
@@ -115,14 +121,26 @@ export default function Dashboard() {
           </div>
 
           <div className="bg-surface p-6 rounded-3xl shadow-sm border border-border flex items-start space-x-4">
-            <div className="p-4 bg-success/20 text-[#6a8756] rounded-2xl">
-              <FiCalendar size={28} />
+            <div className="p-4 bg-[#8b6b55]/10 text-[#8b6b55] rounded-2xl">
+              <FiFolder size={28} />
             </div>
             <div>
-              <p className="text-inkMuted font-medium text-sm">Current Streak</p>
-              <h3 className="text-3xl font-bold text-ink mt-1">{streak} <span className="text-base font-normal text-inkMuted">days</span></h3>
+              <p className="text-inkMuted font-medium text-sm">Completed Projects</p>
+              <h3 className="text-3xl font-bold text-ink mt-1">{completedProjects}</h3>
             </div>
           </div>
+
+          <div className="bg-surface p-6 rounded-3xl shadow-sm border border-border flex items-start space-x-4">
+            <div className="p-4 bg-success/20 text-[#6a8756] rounded-2xl">
+              <FiClock size={28} />
+            </div>
+            <div>
+              <p className="text-inkMuted font-medium text-sm">Longest Focus</p>
+              <h3 className="text-3xl font-bold text-ink mt-1">{longestSession} <span className="text-base font-normal text-inkMuted">mins</span></h3>
+            </div>
+          </div>
+
+
         </div>
       </div>
     </div>

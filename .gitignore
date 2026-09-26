@@ -14,3 +14,5 @@ bin/
 # Maven
 target/
 
+uploads/            
+#resume uploads

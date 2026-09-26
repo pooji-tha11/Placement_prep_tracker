@@ -31,4 +31,9 @@ public class AchievementTracker {
     public boolean removeAchievement(String id) {
         return service.deleteAchievement(id);
     }
+
+    public AchievementEntry updateAchievement(String id, Achievement a) {
+        return service.updateAchievement(id, a);
+    }
+
 }

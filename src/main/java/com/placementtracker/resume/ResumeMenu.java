@@ -53,7 +53,7 @@ public class ResumeMenu {
             Resume resume = tracker.addResume(label, version, filename, LocalDate.now());
             System.out.println("Resume added successfully:");
             System.out.println(resume.summary());
-        } catch (IllegalArgumentException | DuplicateResumeException e) {
+        } catch (Exception e) {
             System.out.println("Could not add resume: " + e.getMessage());
         }
     }

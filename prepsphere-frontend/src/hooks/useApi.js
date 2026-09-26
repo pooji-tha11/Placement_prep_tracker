@@ -37,11 +37,17 @@ export function useApi(endpoint, autoFetch = true) {
     return res;
   };
 
+  const putData = async (path, body) => {
+    const res = await api.put(path, body);
+    await fetchData();
+    return res;
+  };
+
   const deleteData = async (path) => {
     const res = await api.del(path);
     await fetchData();
     return res;
   };
 
-  return { data, loading, error, fetchData, postData, patchData, deleteData, setData, setError };
+  return { data, loading, error, fetchData, postData, patchData, putData, deleteData, setData, setError };
 }

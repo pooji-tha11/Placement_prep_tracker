@@ -143,4 +143,21 @@ public class DSARepository {
                 rs.getTimestamp("created_at").toLocalDateTime()
         );
     }
+
+    public boolean update(Problem p) {
+        String sql = "UPDATE problems SET platform = ?, dsa_tag = ?, difficulty = ?, confidence_level = ?, solved_date = ? WHERE id = ?";
+        try (java.sql.Connection conn = com.placementtracker.database.DatabaseConnection.getConnection();
+             java.sql.PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, p.getPlatform());
+            stmt.setString(2, p.getDsaTag());
+            stmt.setString(3, p.getDifficulty().toString());
+            stmt.setInt(4, p.getConfidenceLevel());
+            stmt.setDate(5, java.sql.Date.valueOf(p.getSolvedDate()));
+            stmt.setString(6, p.getId());
+            return stmt.executeUpdate() > 0;
+        } catch (java.sql.SQLException e) {
+            throw new RuntimeException("Failed to update problem: " + e.getMessage(), e);
+        }
+    }
+
 }

@@ -154,4 +154,24 @@ public class ApplicationRepository {
                 rs.getTimestamp("created_at").toLocalDateTime()
         );
     }
+
+    public boolean update(JobApplication a) {
+        String sql = "UPDATE applications SET company = ?, role = ?, date_applied = ?, job_link = ?, job_description = ?, required_skills = ?, notes = ?, resume_id = ? WHERE id = ?";
+        try (java.sql.Connection conn = com.placementtracker.database.DatabaseConnection.getConnection();
+             java.sql.PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, a.getCompany());
+            stmt.setString(2, a.getRole());
+            stmt.setDate(3, java.sql.Date.valueOf(a.getDateApplied()));
+            stmt.setString(4, a.getJobLink());
+            stmt.setString(5, a.getJobDescription());
+            stmt.setString(6, String.join(";", a.getRequiredSkills()));
+            stmt.setString(7, a.getNotes());
+            stmt.setString(8, a.getResumeId());
+            stmt.setString(9, a.getId());
+            return stmt.executeUpdate() > 0;
+        } catch (java.sql.SQLException e) {
+            throw new RuntimeException("Failed to update application: " + e.getMessage(), e);
+        }
+    }
+
 }

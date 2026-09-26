@@ -175,4 +175,13 @@ public class ApplicationService {
                 .flatMap(a -> a.getRequiredSkills().stream())
                 .collect(Collectors.toCollection(TreeSet::new));
     }
+
+    public JobApplication updateApplication(String id, String company, String role, java.time.LocalDate dateApplied, String jobLink, String jobDescription, java.util.List<String> requiredSkills, String notes, String resumeId) {
+        JobApplication a = repository.findById(id);
+        if (a == null) throw new IllegalArgumentException("Application not found");
+        JobApplication updated = new JobApplication(id, company, role, dateApplied, a.getStatus(), jobLink, jobDescription, requiredSkills, notes, resumeId, a.getCreatedAt());
+        repository.update(updated);
+        return updated;
+    }
+
 }

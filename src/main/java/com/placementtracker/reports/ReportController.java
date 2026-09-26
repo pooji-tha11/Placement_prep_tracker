@@ -50,14 +50,7 @@ public class ReportController {
         return tracker.interviewConversionRate();
     }
 
-    @GetMapping("/study/summary")
-    public Map<String, Object> studySummary() {
-        return Map.of(
-                "weeklyMinutes", tracker.weeklyStudyMinutes(),
-                "currentStreak", tracker.currentStreak(),
-                "longestStreak", tracker.longestStreak()
-        );
-    }
+
 
     @GetMapping("/readiness")
     public Map<String, Object> readiness() {

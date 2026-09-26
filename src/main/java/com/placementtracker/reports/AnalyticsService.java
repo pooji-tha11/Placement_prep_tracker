@@ -9,7 +9,7 @@ import com.placementtracker.dsa.Problem;
 import com.placementtracker.project.Project;
 import com.placementtracker.project.ProjectStatus;
 import com.placementtracker.project.ProjectTracker;
-import com.placementtracker.study.StudyTracker;
+
 
 import java.util.Comparator;
 import java.util.List;
@@ -21,14 +21,12 @@ public class AnalyticsService {
     private final DSATracker dsaTracker;
     private final ProjectTracker projectTracker;
     private final ApplicationTracker applicationTracker;
-    private final StudyTracker studyTracker;
 
     public AnalyticsService(DSATracker dsaTracker, ProjectTracker projectTracker,
-                             ApplicationTracker applicationTracker, StudyTracker studyTracker) {
+                             ApplicationTracker applicationTracker) {
         this.dsaTracker = dsaTracker;
         this.projectTracker = projectTracker;
         this.applicationTracker = applicationTracker;
-        this.studyTracker = studyTracker;
     }
 
     // ---------- DSA analytics ----------
@@ -85,17 +83,5 @@ public class AnalyticsService {
         return (reachedInterviewOrBeyond * 100.0) / all.size();
     }
 
-    // ---------- Study analytics (pass-through, no need to recompute) ----------
 
-    public int getWeeklyStudyMinutes() {
-        return studyTracker.weeklyMinutes();
-    }
-
-    public int getCurrentStreak() {
-        return studyTracker.currentStreak();
-    }
-
-    public int getLongestStreak() {
-        return studyTracker.longestStreak();
-    }
 }
